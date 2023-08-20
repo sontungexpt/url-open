@@ -1,26 +1,27 @@
---- Options for the plugin
---
 local M = {}
 
 --- Default options
+-- @field deep_pattern: boolean
+-- @field extra_patterns: table
 -- @table DEFAULT_OPTIONS
--- @field deep_pattern: Whether to search for patterns in nested tables
--- @field extra_pattern: Extra patterns to search for
 M.DEFAULT_OPTIONS = {
 	deep_pattern = false,
 	extra_patterns = {
-		-- [pattern] = prefix: string only or
+		-- [pattern] = prefix: string only or nil
 		-- [pattern] = {prefix = "", suffix = ""},
-		--Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
+		--
+		-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
 		-- so the url will be https://www.npmjs.com/package/<pattern found>
-		--Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
+		--
+		-- Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
 		-- so the url will be https://www.npmjs.com/package/<pattern found>/issues
 	},
 }
 
---- Validate user options
--- @tparam table opts: User options
--- @return table: Validated options
+--- Validate options
+-- @tparam table opts: Options to validate
+-- @treturn table: Validated options
+-- @see DEFAULT_OPTIONS
 M.validate_opts = function(opts)
 	local success, error_msg = pcall(function()
 		vim.validate { opts = { opts, "table", true } }
@@ -50,9 +51,11 @@ M.validate_opts = function(opts)
 	return opts
 end
 
---- Apply user options to the default options
+--- Apply user options
 -- @tparam table user_opts: User options
--- @return table: Merged options
+-- @treturn table: Merged options
+-- @see DEFAULT_OPTIONS
+-- @see validate_opts
 M.apply_user_options = function(user_opts)
 	user_opts = M.validate_opts(user_opts)
 	return vim.tbl_deep_extend("force", M.DEFAULT_OPTIONS, user_opts or {})

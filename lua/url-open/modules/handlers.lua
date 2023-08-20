@@ -1,7 +1,11 @@
+--- Handlers for opening urls
+--
+--
 local api = vim.api
 local fn = vim.fn
 
-local patterns_module = require("modules.patterns")
+--- @see url-open.modules.patterns
+local patterns_module = require("url-open.modules.patterns")
 
 local M = {}
 
@@ -48,6 +52,7 @@ M.find_url = function(user_opts, text, start_pos)
 	for pattern, subs in pairs(user_opts.extra_patterns) do
 		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
 		if url then
+			subs = subs or ""
 			if type(subs) == "string" then
 				url = subs .. url
 			else
@@ -67,6 +72,9 @@ M.find_url = function(user_opts, text, start_pos)
 	return nil, nil, nil -- no url found
 end
 
+--- Open the url under the cursor
+-- If there is only one url in the line, then open it anywhere in the line.
+-- @tparam table user_opts: User options
 M.open_url = function(user_opts)
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_col = cursor_pos[2]
