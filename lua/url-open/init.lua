@@ -84,54 +84,99 @@ local find_url = function(user_opts, text, start_pos)
 end
 
 local open_url = function(user_opts)
-    local cursor_pos = api.nvim_win_get_cursor(0)
-    local cursor_col = cursor_pos[2]
-    local line = api.nvim_get_current_line()
+	local cursor_pos = api.nvim_win_get_cursor(0)
+	local cursor_col = cursor_pos[2]
+	local line = api.nvim_get_current_line()
 
-    local url_to_open = nil
+	local url_to_open = nil
 
-    -- get the first url in the line
-    local start_pos, end_pos, url = find_url(user_opts, line)
+	-- get the first url in the line
+	local start_pos, end_pos, url = find_url(user_opts, line)
 
-    while url do
-        url_to_open = url
-        -- if the url under cursor, then break
-        if cursor_col >= start_pos and cursor_col <= end_pos then break end
+	while url do
+		url_to_open = url
+		-- if the url under cursor, then break
+		if cursor_col >= start_pos and cursor_col <= end_pos then break end
 
-        -- find the next url
-        start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
-    end
+		-- find the next url
+		start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
+	end
 
-    if url_to_open then
-        local shell_safe_url = fn.shellescape(url_to_open)
-        local command = ""
-        if vim.loop.os_uname().sysname == "Linux" then
-            command = "silent! !xdg-open " .. shell_safe_url
-        elseif vim.loop.os_uname().sysname == "Darwin" then
-            command = "silent! !open " .. shell_safe_url
-        elseif vim.loop.os_uname().sysname == "Windows" then
-            command = "silent! !start " .. shell_safe_url
-        else
-            print("Unknown operating system.")
-            return
-        end
-        call_cmd(command, {
-            success = "Opening " .. url_to_open .. " successfully.",
-            error = "Opening " .. url_to_open .. " failed.",
-        })
-    end
+	if url_to_open then
+		local shell_safe_url = fn.shellescape(url_to_open)
+		local command = ""
+		if vim.loop.os_uname().sysname == "Linux" then
+			if fn.executable("xdg-open") == 1 then
+				command = "silent! !xdg-open " .. shell_safe_url
+			elseif fn.executable("gnome-open") then
+				command = "silent! !gnome-open " .. shell_safe_url
+			else
+				vim.schedule(
+					function()
+						vim.notify(
+							"No known command to open url on Linux",
+							vim.log.levels.ERROR,
+							{ title = "URL Handler" }
+						)
+					end
+				)
+				return
+			end
+		elseif vim.loop.os_uname().sysname == "Darwin" then
+			if fn.executable("open") == 1 then
+				command = "silent! !open " .. shell_safe_url
+			else
+				vim.schedule(
+					function()
+						vim.notify(
+							"No known command to open url on MacOS",
+							vim.log.levels.ERROR,
+							{ title = "URL Handler" }
+						)
+					end
+				)
+				return
+			end
+		elseif vim.loop.os_uname().sysname == "Windows" then
+			if fn.executable("start") == 1 then
+				command = "silent! !start " .. shell_safe_url
+			else
+				vim.schedule(
+					function()
+						vim.notify(
+							"No known command to open url on Windows",
+							vim.log.levels.ERROR,
+							{ title = "URL Handler" }
+						)
+					end
+				)
+				return
+			end
+		else
+			vim.schedule(
+				function()
+					vim.notify("Unknown operating system.", vim.log.levels.ERROR, { title = "URL Handler" })
+				end
+			)
+			return
+		end
+		call_cmd(command, {
+			success = "Opening " .. url_to_open .. " successfully.",
+			error = "Opening " .. url_to_open .. " failed.",
+		})
+	end
 end
 
 local init_command = function(user_opts)
-    vim.api.nvim_create_user_command(
-        "OpenUrlUnderCursor",
-        function() open_url(user_opts) end,
-        { nargs = 0 }
-    )
+	vim.api.nvim_create_user_command(
+		"OpenUrlUnderCursor",
+		function() open_url(user_opts) end,
+		{ nargs = 0 }
+	)
 end
 
 Plugin.setup = function(user_opts)
-    local options = vim.tbl_deep_extend("force", DEFAULT_OPTIONS, user_opts or {})
+	local options = vim.tbl_deep_extend("force", DEFAULT_OPTIONS, user_opts or {})
 	init_command(options)
 end
 
