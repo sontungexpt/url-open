@@ -97,13 +97,58 @@ M.open_url = function(user_opts)
 		local shell_safe_url = fn.shellescape(url_to_open)
 		local command = ""
 		if vim.loop.os_uname().sysname == "Linux" then
-			command = "silent! !xdg-open " .. shell_safe_url
+			if fn.executable("xdg-open") == 1 then
+				command = "silent! !xdg-open " .. shell_safe_url
+			elseif fn.executable("gnome-open") then
+				command = "silent! !gnome-open " .. shell_safe_url
+			else
+				vim.schedule(
+					function()
+						vim.notify(
+							"No known command to open url on Linux",
+							vim.log.levels.ERROR,
+							{ title = "URL Handler" }
+						)
+					end
+				)
+				return
+			end
 		elseif vim.loop.os_uname().sysname == "Darwin" then
-			command = "silent! !open " .. shell_safe_url
+			if fn.executable("open") == 1 then
+				command = "silent! !open " .. shell_safe_url
+			else
+				vim.schedule(
+					function()
+						vim.notify(
+							"No known command to open url on MacOS",
+							vim.log.levels.ERROR,
+							{ title = "URL Handler" }
+						)
+					end
+				)
+				return
+			end
 		elseif vim.loop.os_uname().sysname == "Windows" then
-			command = "silent! !start " .. shell_safe_url
+			if fn.executable("start") == 1 then
+				command = "silent! !start " .. shell_safe_url
+			else
+				vim.schedule(
+					function()
+						vim.notify(
+							"No known command to open url on Windows",
+							vim.log.levels.ERROR,
+							{ title = "URL Handler" }
+						)
+					end
+				)
+				return
+			end
 		else
-			print("Unknown operating system.")
+			vim.schedule(
+				function()
+					vim.notify("Unknown operating system.", vim.log.levels.ERROR, { title = "URL Handler" })
+				end
+			)
 			return
 		end
 		M.call_cmd(command, {

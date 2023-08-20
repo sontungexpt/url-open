@@ -30,6 +30,7 @@ default browser of your system.
   - http://example.com:8080
   - https://www.example.com:8443
   - ftp://ftp.example.com:2121
+- Allow you to open url from anywhere in the line if it only contains 1 url
 
 ## Installation
 
