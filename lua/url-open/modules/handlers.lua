@@ -5,6 +5,7 @@ local api = vim.api
 local fn = vim.fn
 
 local patterns_module = require("url-open.modules.patterns")
+local logger = require("url-open.modules.logger")
 
 local M = {}
 
@@ -13,21 +14,19 @@ local M = {}
 -- @tparam table msg : The message to print on success or error
 M.call_cmd = function(command, msg)
 	local success, error_message = pcall(api.nvim_command, command)
-	vim.schedule(function()
-		if success then
-			if msg and msg.success then
-				vim.notify(msg.success, vim.log.levels.INFO, { title = "URL Handler" })
-			else
-				vim.notify("Success", vim.log.levels.INFO, { title = "URL Handler" })
-			end
+	if success then
+		if msg and msg.success then
+			logger.info(msg.success, { title = "URL Handler" })
 		else
-			if msg and msg.error then
-				vim.notify(msg.error .. ": " .. error_message, vim.log.levels.ERROR, { title = "URL Handler" })
-			else
-				vim.notify(error_message, vim.log.levels.ERROR, { title = "URL Handler" })
-			end
+			logger.info("Success", { title = "URL Handler" })
 		end
-	end)
+	else
+		if msg and msg.error then
+			logger.error(msg.error .. ": " .. error_message, { title = "URL Handler" })
+		else
+			logger.error("Error: " .. error_message, { title = "URL Handler" })
+		end
+	end
 end
 
 --- Find the first url in the text
@@ -102,53 +101,25 @@ M.open_url = function(user_opts)
 			elseif fn.executable("gnome-open") then
 				command = "silent! !gnome-open " .. shell_safe_url
 			else
-				vim.schedule(
-					function()
-						vim.notify(
-							"No known command to open url on Linux",
-							vim.log.levels.ERROR,
-							{ title = "URL Handler" }
-						)
-					end
-				)
+				logger.error("Unknown command to open url on Linux", { title = "URL Handler" })
 				return
 			end
 		elseif vim.loop.os_uname().sysname == "Darwin" then
 			if fn.executable("open") == 1 then
 				command = "silent! !open " .. shell_safe_url
 			else
-				vim.schedule(
-					function()
-						vim.notify(
-							"No known command to open url on MacOS",
-							vim.log.levels.ERROR,
-							{ title = "URL Handler" }
-						)
-					end
-				)
+				logger.error("Unknown command to open url on MacOS", { title = "URL Handler" })
 				return
 			end
 		elseif vim.loop.os_uname().sysname == "Windows" then
 			if fn.executable("start") == 1 then
 				command = "silent! !start " .. shell_safe_url
 			else
-				vim.schedule(
-					function()
-						vim.notify(
-							"No known command to open url on Windows",
-							vim.log.levels.ERROR,
-							{ title = "URL Handler" }
-						)
-					end
-				)
+				logger.error("Unknown command to open url on Windows", { title = "URL Handler" })
 				return
 			end
 		else
-			vim.schedule(
-				function()
-					vim.notify("Unknown operating system.", vim.log.levels.ERROR, { title = "URL Handler" })
-				end
-			)
+			logger.error("Unknown operating system.", { title = "URL Handler" })
 			return
 		end
 		M.call_cmd(command, {
