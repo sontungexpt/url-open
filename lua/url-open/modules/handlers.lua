@@ -36,27 +36,31 @@ end
 -- @return start_pos, end_pos, url: Start position, end position, and url of the first url found (all nil if not found)
 -- @see url-open.modules.patterns
 M.find_url = function(user_opts, text, start_pos)
-	start_pos = start_pos or 0
+	start_pos = start_pos or 1
 
+	local min_start_pos_found = string.len(text)
+	local start_found, end_found, url_found = nil, nil, nil
 	for pattern, prefix in pairs(patterns_module.PATTERNS) do
 		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-		if url then
+		if url and min_start_pos_found > start_pos_result then
+			min_start_pos_found = start_pos_result
 			url = prefix .. url
-			return start_pos_result, end_pos_result, url
+			start_found, end_found, url_found = start_pos_result, end_pos_result, url
 		end
 	end
 
 	-- check extra patterns
 	for pattern, subs in pairs(user_opts.extra_patterns) do
 		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-		if url then
+		if url and min_start_pos_found > start_pos_result then
+			min_start_pos_found = start_pos_result
 			subs = subs or ""
 			if type(subs) == "string" then
 				url = subs .. url
 			else
 				url = (subs.prefix or "") .. url .. (subs.suffix or "")
 			end
-			return start_pos_result, end_pos_result, url
+			start_found, end_found, url_found = start_pos_result, end_pos_result, url
 		end
 	end
 
@@ -64,10 +68,13 @@ M.find_url = function(user_opts, text, start_pos)
 	if user_opts.deep_pattern then
 		local results = fn.matchstrpos(text, patterns_module.DEEP_PATTERN, start_pos)
 		-- result[1] is url, result[2] is start_pos, result[3] is end_pos
-		if results[1] ~= "" then return results[2], results[3], results[1] end
+		if results[1] ~= "" and min_start_pos_found > results[2] then
+			min_start_pos_found = results[2]
+			start_found, end_found, url_found = results[2], results[3], results[1]
+		end
 	end
 
-	return nil, nil, nil -- no url found
+	return start_found, end_found, url_found
 end
 
 --- Open the url under the cursor
@@ -126,6 +133,8 @@ M.open_url = function(user_opts)
 			success = "Opening " .. url_to_open .. " successfully.",
 			error = "Opening " .. url_to_open .. " failed.",
 		})
+	else
+		logger.error("No url found.", { title = "URL Handler" })
 	end
 end
 
