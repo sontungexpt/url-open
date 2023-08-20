@@ -8,7 +8,7 @@ local patterns_module = require("url-open.modules.patterns")
 
 local M = {}
 
----
+--- Call a vim command
 -- @tparam string command : The command to execute
 -- @tparam table msg : The message to print on success or error
 M.call_cmd = function(command, msg)
