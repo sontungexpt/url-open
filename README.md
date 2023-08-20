@@ -48,8 +48,8 @@ default browser of your system.
 },
 ```
 
-NOTE: If you want to use minimal source with no commnets, no validate configs,
-you can use branch `mini` instead of `main` branch
+- NOTE: If you want to use minimal source with no commnets, no validate configs,
+  you can use branch `mini` instead of `main` branch
 
 ```lua
 -- lazy.nvim
