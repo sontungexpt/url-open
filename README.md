@@ -48,6 +48,25 @@ default browser of your system.
 },
 ```
 
+NOTE: If you want to use minimal source with no commnets, no validate configs,
+you can use branch `mini` instead of `main` branch
+
+```lua
+-- lazy.nvim
+{
+	"sontungexpt/url-open",
+    branch = "mini",
+	cmd = "OpenUrlUnderCursor",
+	config = function()
+		local status_ok, url_open = pcall(require, "url-open")
+		if not status_ok then
+			return
+		end
+		url_open.setup ({})
+	end,
+},
+```
+
 ## Configuration
 
 You can easily add more patterns to open url under cursor by adding more patterns to `extra_patterns` config
