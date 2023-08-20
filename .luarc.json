@@ -1,0 +1,10 @@
+{
+    "runtime.version": "LuaJIT",
+    "diagnostics.globals": [
+        "vim",
+        "vim"
+    ],
+    "diagnostics.disable": [
+        "unused-local"
+    ]
+}

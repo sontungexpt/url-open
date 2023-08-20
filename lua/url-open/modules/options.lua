@@ -1,3 +1,5 @@
+--- Provide options for the plugin
+--
 local M = {}
 
 --- Default options
@@ -19,8 +21,8 @@ M.DEFAULT_OPTIONS = {
 }
 
 --- Validate options
--- @tparam table opts: Options to validate
--- @treturn table: Validated options
+-- @tparam table opts : Options to validate
+-- @return table: Validated options
 -- @see DEFAULT_OPTIONS
 M.validate_opts = function(opts)
 	local success, error_msg = pcall(function()
@@ -52,8 +54,8 @@ M.validate_opts = function(opts)
 end
 
 --- Apply user options
--- @tparam table user_opts: User options
--- @treturn table: Merged options
+-- @tparam table user_opts : User options
+-- @return table: Merged options
 -- @see DEFAULT_OPTIONS
 -- @see validate_opts
 M.apply_user_options = function(user_opts)

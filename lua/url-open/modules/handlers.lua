@@ -4,15 +4,13 @@
 local api = vim.api
 local fn = vim.fn
 
---- @see url-open.modules.patterns
 local patterns_module = require("url-open.modules.patterns")
 
 local M = {}
 
 ---
--- @tparam string command: The command to execute
--- @tparam table msg: The message to print on success or error
--- @usage call_cmd("echo 'Hello World'", { success = "Hello World", error = "Failed to print Hello World" })
+-- @tparam string command : The command to execute
+-- @tparam table msg : The message to print on success or error
 M.call_cmd = function(command, msg)
 	local success, error_message = pcall(api.nvim_command, command)
 	vim.schedule(function()
@@ -33,10 +31,11 @@ M.call_cmd = function(command, msg)
 end
 
 --- Find the first url in the text
--- @tparam table usr_opts: User options
--- @tparam string text: Text to search for urls
--- @tparam number start_pos: Start position to search from (optional) (default: 0)
+-- @tparam table user_opts : User options
+-- @tparam string text : Text to search for urls
+-- @tparam number start_pos : Start position to search from (optional) (default: 0)
 -- @return start_pos, end_pos, url: Start position, end position, and url of the first url found (all nil if not found)
+-- @see url-open.modules.patterns
 M.find_url = function(user_opts, text, start_pos)
 	start_pos = start_pos or 0
 
@@ -74,7 +73,7 @@ end
 
 --- Open the url under the cursor
 -- If there is only one url in the line, then open it anywhere in the line.
--- @tparam table user_opts: User options
+-- @tparam table user_opts : User options
 M.open_url = function(user_opts)
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_col = cursor_pos[2]

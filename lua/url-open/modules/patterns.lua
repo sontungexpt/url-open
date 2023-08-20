@@ -1,3 +1,5 @@
+--- Provides default patterns to match urls
+--
 local M = {}
 
 --- Deep Pattern to match urls
