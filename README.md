@@ -30,6 +30,7 @@ default browser of your system.
   - http://example.com:8080
   - https://www.example.com:8443
   - ftp://ftp.example.com:2121
+- Allow you to open url from anywhere in the line if it only contains 1 url
 
 ## Installation
 
@@ -48,6 +49,25 @@ default browser of your system.
 },
 ```
 
+- NOTE: If you want to use minimal source with no commnets, no validate configs,
+  you can use branch `mini` instead of `main` branch. Make sure you know that your config is valid
+
+```lua
+-- lazy.nvim
+{
+	"sontungexpt/url-open",
+    branch = "mini",
+	cmd = "OpenUrlUnderCursor",
+	config = function()
+		local status_ok, url_open = pcall(require, "url-open")
+		if not status_ok then
+			return
+		end
+		url_open.setup ({})
+	end,
+},
+```
+
 ## Configuration
 
 You can easily add more patterns to open url under cursor by adding more patterns to `extra_patterns` config
@@ -55,6 +75,10 @@ You can easily add more patterns to open url under cursor by adding more pattern
 ```lua
 -- default values
 require("url_open").setup({
+    -- if true, only open url when cursor in the middle of url
+    -- if false, open next url found from cursor position it means you can open
+    -- url even when the cursor is in front of url or in the middle of url
+    open_only_when_cursor_on_url = false,
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
