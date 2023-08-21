@@ -7,6 +7,7 @@ local M = {}
 -- @field extra_patterns: table
 -- @table DEFAULT_OPTIONS
 M.DEFAULT_OPTIONS = {
+	open_only_when_cursor_on_url = false,
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
@@ -30,6 +31,7 @@ M.validate_opts = function(opts)
 
 		if opts then
 			vim.validate {
+				open_only_when_cursor_on_url = { opts.open_only_when_cursor_on_url, "boolean", true },
 				deep_pattern = { opts.deep_pattern, "boolean", true },
 				extra_patterns = { opts.extra_patterns, "table", true },
 			}
