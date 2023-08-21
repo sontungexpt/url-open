@@ -19,6 +19,7 @@ local error = function(msg, opts)
 end
 
 local DEFAULT_OPTIONS = {
+	open_only_when_cursor_on_url = false,
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
@@ -33,13 +34,13 @@ local DEFAULT_OPTIONS = {
 }
 
 local DEEP_PATTERN =
-	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
+"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
 local PATTERNS = {
-	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --url http(s)
-	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --npm package
-	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/", --plugin name git
-	["%[.*%]%((https?://[a-zA-Z0-9_/%-%.~@\\+#=?&]+)%)"] = "", --markdown link
+	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "",             --url http(s)
+	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",     --npm package
+	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/",  --plugin name git
+	["%[.*%]%((https?://[a-zA-Z0-9_/%-%.~@\\+#=?&]+)%)"] = "",  --markdown link
 	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --brew formula
 	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", -- cask formula
 }
@@ -62,27 +63,31 @@ local call_cmd = function(command, msg)
 end
 
 local find_url = function(user_opts, text, start_pos)
-	start_pos = start_pos or 0
+	start_pos = start_pos or 1
 
+	local min_start_pos_found = string.len(text)
+	local start_found, end_found, url_found = nil, nil, nil
 	for pattern, prefix in pairs(PATTERNS) do
 		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-		if url then
+		if url and min_start_pos_found > start_pos_result then
+			min_start_pos_found = start_pos_result
 			url = prefix .. url
-			return start_pos_result, end_pos_result, url
+			start_found, end_found, url_found = start_pos_result, end_pos_result, url
 		end
 	end
 
 	-- check extra patterns
 	for pattern, subs in pairs(user_opts.extra_patterns) do
 		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-		if url then
+		if url and min_start_pos_found > start_pos_result then
+			min_start_pos_found = start_pos_result
 			subs = subs or ""
 			if type(subs) == "string" then
 				url = subs .. url
 			else
 				url = (subs.prefix or "") .. url .. (subs.suffix or "")
 			end
-			return start_pos_result, end_pos_result, url
+			start_found, end_found, url_found = start_pos_result, end_pos_result, url
 		end
 	end
 
@@ -90,10 +95,13 @@ local find_url = function(user_opts, text, start_pos)
 	if user_opts.deep_pattern then
 		local results = fn.matchstrpos(text, DEEP_PATTERN, start_pos)
 		-- result[1] is url, result[2] is start_pos, result[3] is end_pos
-		if results[1] ~= "" then return results[2], results[3], results[1] end
+		if results[1] ~= "" and min_start_pos_found > results[2] then
+			min_start_pos_found = results[2]
+			start_found, end_found, url_found = results[2], results[3], results[1]
+		end
 	end
 
-	return nil, nil, nil -- no url found
+	return start_found, end_found, url_found
 end
 
 local open_url = function(user_opts)
@@ -107,10 +115,15 @@ local open_url = function(user_opts)
 	local start_pos, end_pos, url = find_url(user_opts, line)
 
 	while url do
-		url_to_open = url
-		-- if the url under cursor, then break
-		if cursor_col >= start_pos and cursor_col <= end_pos then break end
-
+		if user_opts.open_only_when_cursor_on_url then
+			if cursor_col >= start_pos and cursor_col < end_pos then
+				url_to_open = url
+				break
+			end
+		else
+			url_to_open = url
+		end
+		if cursor_col < end_pos then break end
 		-- find the next url
 		start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
 	end
@@ -149,6 +162,8 @@ local open_url = function(user_opts)
 			success = "Opening " .. url_to_open .. " successfully.",
 			error = "Opening " .. url_to_open .. " failed.",
 		})
+	else
+		error("No url found.", { title = "URL Handler" })
 	end
 end
 
