@@ -91,9 +91,19 @@ M.open_url = function(user_opts)
 	local start_pos, end_pos, url = M.find_url(user_opts, line)
 
 	while url do
-		url_to_open = url
 		-- if the url under cursor, then break
-		if cursor_col >= start_pos and cursor_col <= end_pos then break end
+		if user_opts.open_only_when_cursor_on_url then
+			if cursor_col >= start_pos and cursor_col < end_pos then
+				url_to_open = url
+				break
+			end
+		else
+			url_to_open = url
+		end
+
+		--if cursor_col >= start_pos and cursor_col < end_pos then break end
+		-- end pos is the next char after the url
+		if cursor_col < end_pos then break end
 
 		-- find the next url
 		start_pos, end_pos, url = M.find_url(user_opts, line, end_pos + 1)
