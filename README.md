@@ -75,6 +75,10 @@ You can easily add more patterns to open url under cursor by adding more pattern
 ```lua
 -- default values
 require("url_open").setup({
+    -- if true, only open url when cursor in the middle of url
+    -- if false, open next url found from cursor position it means you can open
+    -- url even when the cursor is in front of url or in the middle of url
+    open_only_when_cursor_on_url = false,
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
