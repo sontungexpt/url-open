@@ -34,13 +34,13 @@ local DEFAULT_OPTIONS = {
 }
 
 local DEEP_PATTERN =
-"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
+	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
 local PATTERNS = {
-	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "",             --url http(s)
-	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",     --npm package
-	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/",  --plugin name git
-	["%[.*%]%((https?://[a-zA-Z0-9_/%-%.~@\\+#=?&]+)%)"] = "",  --markdown link
+	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --url http(s)
+	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --npm package
+	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/", --plugin name git
+	["%[.*%]%((https?://[a-zA-Z0-9_/%-%.~@\\+#=?&]+)%)"] = "", --markdown link
 	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --brew formula
 	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", -- cask formula
 }
@@ -175,9 +175,32 @@ local init_command = function(user_opts)
 	)
 end
 
+local delete_url_effect = function()
+	for _, match in ipairs(vim.fn.getmatches()) do
+		if match.group == "HighlightURL" then vim.fn.matchdelete(match.id) end
+	end
+end
+
+--- Add syntax matching rules for highlighting URLs/URIs.
+local set_url_effect = function()
+	delete_url_effect()
+	vim.fn.matchadd("HighlightURL", DEEP_PATTERN, 15)
+end
+
+local init_autocmd = function(user_opts)
+	if user_opts.highlight_url_enabled then
+		vim.api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+			desc = "URL Highlighting",
+			group = vim.api.nvim_create_augroup("HighlightUrl", { clear = true }),
+			callback = function() set_url_effect() end,
+		})
+	end
+end
+
 Plugin.setup = function(user_opts)
 	local options = vim.tbl_deep_extend("force", DEFAULT_OPTIONS, user_opts or {})
 	init_command(options)
+	init_autocmd(options)
 end
 
 return Plugin
