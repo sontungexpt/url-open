@@ -22,6 +22,9 @@ local DEFAULT_OPTIONS = {
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
 		enabled = true,
+		fg = "#199bff",
+		bg = nil, -- transparent
+		underline = true,
 		cursor_only = true, -- highlight only when cursor on url or highlight all urls
 	},
 	deep_pattern = false,
@@ -240,7 +243,12 @@ local init_autocmd = function(user_opts)
 				group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
 				callback = function()
 					highlight_cursor_url(user_opts)
-					api.nvim_set_hl(0, "HighlightCursorUrl", { underline = true })
+					local highlight_url = user_opts.highlight_url
+					api.nvim_set_hl(
+						0,
+						"HighlightCursorUrl",
+						{ underline = highlight_url.underline, fg = highlight_url.fg, bg = highlight_url.bg }
+					)
 				end,
 			})
 		else
