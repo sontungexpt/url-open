@@ -20,6 +20,10 @@ end
 
 local DEFAULT_OPTIONS = {
 	open_only_when_cursor_on_url = false,
+	highlight_url = {
+		enabled = true,
+		cursor_only = true, -- highlight only when cursor on url or highlight all urls
+	},
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
@@ -40,7 +44,6 @@ local PATTERNS = {
 	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --url http(s)
 	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --npm package
 	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/", --plugin name git
-	["%[.*%]%((https?://[a-zA-Z0-9_/%-%.~@\\+#=?&]+)%)"] = "", --markdown link
 	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --brew formula
 	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", -- cask formula
 }
@@ -168,32 +171,68 @@ local open_url = function(user_opts)
 end
 
 local init_command = function(user_opts)
-	vim.api.nvim_create_user_command(
-		"OpenUrlUnderCursor",
-		function() open_url(user_opts) end,
-		{ nargs = 0 }
-	)
+	api.nvim_create_user_command("OpenUrlUnderCursor", function() open_url(user_opts) end, { nargs = 0 })
 end
 
 local delete_url_effect = function()
-	for _, match in ipairs(vim.fn.getmatches()) do
-		if match.group == "HighlightURL" then vim.fn.matchdelete(match.id) end
+	for _, match in ipairs(fn.getmatches()) do
+		if match.group == "HightlightAllUrl" then fn.matchdelete(match.id) end
 	end
 end
 
 --- Add syntax matching rules for highlighting URLs/URIs.
 local set_url_effect = function()
 	delete_url_effect()
-	vim.fn.matchadd("HighlightURL", DEEP_PATTERN, 15)
+	fn.matchadd("HightlightAllUrl", DEEP_PATTERN, 15)
+end
+
+local cursor_url_hightlight_id = vim.api.nvim_create_namespace("HighlightCursorUrl")
+
+local function highlight_cursor_url(user_opts)
+	vim.api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+
+	local cursor_pos = api.nvim_win_get_cursor(0)
+	local cursor_row = cursor_pos[1]
+	local cursor_col = cursor_pos[2]
+	local line = api.nvim_get_current_line()
+
+	local start_pos, end_pos, url = find_url(user_opts, line)
+
+	while url do
+		if cursor_col >= start_pos and cursor_col < end_pos then
+			api.nvim_buf_add_highlight(
+				0,
+				cursor_url_hightlight_id,
+				"HighlightCursorUrl",
+				cursor_row - 1,
+				start_pos - 1,
+				end_pos
+			)
+			break
+		end
+		-- find the next url
+		start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
+	end
 end
 
 local init_autocmd = function(user_opts)
-	if user_opts.highlight_url_enabled then
-		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
-			desc = "URL Highlighting",
-			group = vim.api.nvim_create_augroup("HighlightUrl", { clear = true }),
-			callback = function() set_url_effect() end,
-		})
+	if user_opts.highlight_url.enabled then
+		if not user_opts.highlight_url.cursor_only then
+			api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+				desc = "URL Highlighting",
+				group = api.nvim_create_augroup("HightlightAllUrl", { clear = true }),
+				callback = function() set_url_effect() end,
+			})
+		else
+			api.nvim_create_autocmd({ "CursorMoved" }, {
+				desc = "URL Highlighting CursorMoved",
+				group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
+				callback = function()
+					highlight_cursor_url(user_opts)
+					api.nvim_set_hl(0, "HighlightCursorUrl", { underline = true })
+				end,
+			})
+		end
 	end
 end
 
