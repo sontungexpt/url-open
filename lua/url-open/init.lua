@@ -189,7 +189,7 @@ end
 
 local init_autocmd = function(user_opts)
 	if user_opts.highlight_url_enabled then
-		vim.api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
 			desc = "URL Highlighting",
 			group = vim.api.nvim_create_augroup("HighlightUrl", { clear = true }),
 			callback = function() set_url_effect() end,
