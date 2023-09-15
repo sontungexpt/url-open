@@ -6,6 +6,7 @@ local fn = vim.fn
 
 local patterns_module = require("url-open.modules.patterns")
 local logger = require("url-open.modules.logger")
+local cursor_url_hightlight_id = api.nvim_create_namespace("HighlightCursorUrl")
 
 local M = {}
 
@@ -148,4 +149,65 @@ M.open_url = function(user_opts)
 	end
 end
 
+--- Delete the syntax matching rules for URLs/URIs if set.
+M.delete_url_effect = function()
+	for _, match in ipairs(fn.getmatches()) do
+		if match.group == "HighlightAllUrl" then fn.matchdelete(match.id) end
+	end
+end
+
+--- Add syntax matching rules for highlighting URLs/URIs.
+-- @see url-open.modules.patterns
+M.set_url_effect = function()
+	M.delete_url_effect()
+	fn.matchadd("HighlightAllUrl", patterns_module.DEEP_PATTERN, 15)
+end
+
+--- Highlight the url under the cursor
+-- @tparam table user_opts : User options
+-- @see url-open.modules.patterns
+M.highlight_cursor_url = function(user_opts)
+	-- clear old highlight when moving cursor
+	api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+
+	local cursor_pos = api.nvim_win_get_cursor(0)
+	local cursor_row = cursor_pos[1]
+	local cursor_col = cursor_pos[2]
+	local line = api.nvim_get_current_line()
+
+	local start_pos, end_pos, url = M.find_url(user_opts, line)
+
+	while url do
+		-- clear the other highlight url to make sure only one url is highlighted
+		api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+		if user_opts.open_only_when_cursor_on_url then
+			if cursor_col >= start_pos and cursor_col < end_pos then
+				api.nvim_buf_add_highlight(
+					0,
+					cursor_url_hightlight_id,
+					"HighlightCursorUrl",
+					cursor_row - 1,
+					start_pos - 1,
+					end_pos
+				)
+				break
+			end
+		else
+			api.nvim_buf_add_highlight(
+				0,
+				cursor_url_hightlight_id,
+				"HighlightCursorUrl",
+				cursor_row - 1,
+				start_pos - 1,
+				end_pos
+			)
+		end
+
+		--if cursor_col >= start_pos and cursor_col < end_pos then break end
+		-- end pos is the next char after the url
+		if cursor_col < end_pos then break end
+		-- find the next url
+		start_pos, end_pos, url = M.find_url(user_opts, line, end_pos + 1)
+	end
+end
 return M
