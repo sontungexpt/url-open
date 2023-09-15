@@ -7,7 +7,7 @@ local M = {}
 
 M.setup = function(opts)
 	if opts.highlight_url_enabled then
-		autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+		autocmd({ "BufWritePost", "BufEnter" }, {
 			desc = "URL Highlighting",
 			group = augroup("HighlightUrl", { clear = true }),
 			callback = function() utils.set_url_effect() end,
