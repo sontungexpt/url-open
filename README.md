@@ -14,6 +14,7 @@ default browser of your system.
 
 ## Features
 
+- Highlight url under cursor
 - Open the url under cursor include markdown link (e.g. `https://github.com/sontungexpt/url-open`)
 - Open the github page of neovim plugin name under cursor (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open")
 - Open the npm package in package.json (e.g. `"lodash": "^4.17.21",`)
@@ -38,6 +39,7 @@ default browser of your system.
 -- lazy.nvim
 {
 	"sontungexpt/url-open",
+    event = "VeryLazy"
 	cmd = "OpenUrlUnderCursor",
 	config = function()
 		local status_ok, url_open = pcall(require, "url-open")
@@ -57,6 +59,7 @@ default browser of your system.
 {
 	"sontungexpt/url-open",
     branch = "mini",
+    event = "VeryLazy"
 	cmd = "OpenUrlUnderCursor",
 	config = function()
 		local status_ok, url_open = pcall(require, "url-open")
@@ -78,7 +81,8 @@ require("url_open").setup({
     -- if true, only open url when cursor in the middle of url
     -- if false, open next url found from cursor position it means you can open
     -- url even when the cursor is in front of url or in the middle of url
-    open_only_when_cursor_on_url = false,
+	open_only_when_cursor_on_url = false,
+	highlight_url_enabled = true,
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
