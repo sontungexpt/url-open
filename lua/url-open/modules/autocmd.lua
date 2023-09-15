@@ -1,3 +1,5 @@
+--- The module that handles the autocmds
+--
 local api = vim.api
 local autocmd = api.nvim_create_autocmd
 local augroup = api.nvim_create_augroup
@@ -6,6 +8,12 @@ local handlers = require("url-open.modules.handlers")
 
 local M = {}
 
+--- Setup the autocmds
+-- @tparam table user_opts : The user options
+-- @treturn nil
+-- @see url-open.setup
+-- @see url-open.modules.handlers.highlight_cursor_url
+-- @see url-open.modules.handlers.set_url_effect
 M.setup = function(user_opts)
 	if user_opts.highlight_url.enabled then
 		if user_opts.highlight_url.cursor_only then

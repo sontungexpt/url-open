@@ -33,6 +33,12 @@ default browser of your system.
   - ftp://ftp.example.com:2121
 - Allow you to open url from anywhere in the line if it only contains 1 url
 
+## Preview
+
+- Highlight url which can be opened then you can open it by `:OpenUrlUnderCursor`
+
+![hightlight-url](./docs/readme/preview1.png)
+
 ## Installation
 
 ```lua
