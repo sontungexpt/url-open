@@ -186,10 +186,10 @@ local set_url_effect = function()
 	fn.matchadd("HightlightAllUrl", DEEP_PATTERN, 15)
 end
 
-local cursor_url_hightlight_id = vim.api.nvim_create_namespace("HighlightCursorUrl")
+local cursor_url_hightlight_id = api.nvim_create_namespace("HighlightCursorUrl")
 
 local function highlight_cursor_url(user_opts)
-	vim.api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+	api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
 
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_row = cursor_pos[1]
@@ -199,7 +199,21 @@ local function highlight_cursor_url(user_opts)
 	local start_pos, end_pos, url = find_url(user_opts, line)
 
 	while url do
-		if cursor_col >= start_pos and cursor_col < end_pos then
+		-- clear the other highlight url to make sure only one url is highlighted
+		api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+		if user_opts.open_only_when_cursor_on_url then
+			if cursor_col >= start_pos and cursor_col < end_pos then
+				api.nvim_buf_add_highlight(
+					0,
+					cursor_url_hightlight_id,
+					"HighlightCursorUrl",
+					cursor_row - 1,
+					start_pos - 1,
+					end_pos
+				)
+				break
+			end
+		else
 			api.nvim_buf_add_highlight(
 				0,
 				cursor_url_hightlight_id,
@@ -208,8 +222,11 @@ local function highlight_cursor_url(user_opts)
 				start_pos - 1,
 				end_pos
 			)
-			break
 		end
+
+		--if cursor_col >= start_pos and cursor_col < end_pos then break end
+		-- end pos is the next char after the url
+		if cursor_col < end_pos then break end
 		-- find the next url
 		start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
 	end
