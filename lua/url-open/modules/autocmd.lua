@@ -22,7 +22,12 @@ M.setup = function(user_opts)
 				group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
 				callback = function()
 					handlers.highlight_cursor_url(user_opts)
-					api.nvim_set_hl(0, "HighlightCursorUrl", { underline = true })
+					local highlight_url = user_opts.highlight_url
+					api.nvim_set_hl(
+						0,
+						"HighlightCursorUrl",
+						{ underline = highlight_url.underline, fg = highlight_url.fg, bg = highlight_url.bg }
+					)
 				end,
 			})
 		else
