@@ -234,13 +234,7 @@ end
 
 local init_autocmd = function(user_opts)
 	if user_opts.highlight_url.enabled then
-		if not user_opts.highlight_url.cursor_only then
-			api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
-				desc = "URL Highlighting",
-				group = api.nvim_create_augroup("HightlightAllUrl", { clear = true }),
-				callback = function() set_url_effect() end,
-			})
-		else
+		if user_opts.highlight_url.cursor_only then
 			api.nvim_create_autocmd({ "CursorMoved" }, {
 				desc = "URL Highlighting CursorMoved",
 				group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
@@ -248,6 +242,12 @@ local init_autocmd = function(user_opts)
 					highlight_cursor_url(user_opts)
 					api.nvim_set_hl(0, "HighlightCursorUrl", { underline = true })
 				end,
+			})
+		else
+			api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+				desc = "URL Highlighting",
+				group = api.nvim_create_augroup("HightlightAllUrl", { clear = true }),
+				callback = function() set_url_effect() end,
 			})
 		end
 	end
