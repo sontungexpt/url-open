@@ -90,7 +90,10 @@ require("url_open").setup({
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
 		enabled = true,
-		cursor_only = true, -- highlight the url which can be opened if true, otherwise highlight all urls
+		cursor_only = true, -- highlight only when cursor on url or highlight all urls
+		fg = "#199bff",
+		bg = nil, -- transparent
+		underline = true,
 	},
 	deep_pattern = false,
 	extra_patterns = {
