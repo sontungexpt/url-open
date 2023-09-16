@@ -186,7 +186,7 @@ end
 --- Add syntax matching rules for highlighting URLs/URIs.
 local set_url_effect = function()
 	delete_url_effect()
-	fn.matchadd("HightlightAllUrl", DEEP_PATTERN, 15)
+	fn.matchadd("HightlightAllUrl", DEEP_PATTERN, -1)
 end
 
 local cursor_url_hightlight_id = api.nvim_create_namespace("HighlightCursorUrl")
@@ -258,7 +258,7 @@ local init_autocmd = function(user_opts)
 				end,
 			})
 		else
-			api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+			api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
 				desc = "URL Highlighting",
 				group = api.nvim_create_augroup("HightlightAllUrl", { clear = true }),
 				callback = function()
