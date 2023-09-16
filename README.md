@@ -87,6 +87,10 @@ require("url_open").setup({
     -- if true, only open url when cursor in the middle of url
     -- if false, open next url found from cursor position it means you can open
     -- url even when the cursor is in front of url or in the middle of url
+	open_app = "default",
+	-- default will open url with default browser of your system or you can choose your browser like this
+	-- open_app = "micorsoft-edge-stable",
+	-- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
 		enabled = true,
