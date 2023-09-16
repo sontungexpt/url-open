@@ -45,7 +45,7 @@ open an issue or create a pull request to fix it
 
 ![hightlight-all-url](./docs/readme/preview2.png)
 
-![hightlight-when-cursor-on](./docs/readme/preview.mp4)
+https://github.com/sontungexpt/url-open/assets/92097639/9b4fe61a-b948-470c-a1df-cd16dea706e7
 
 ## Installation
 
