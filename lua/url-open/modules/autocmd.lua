@@ -22,22 +22,39 @@ M.setup = function(user_opts)
 				group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
 				callback = function()
 					handlers.highlight_cursor_url(user_opts)
-					local highlight_url = user_opts.highlight_url
-					api.nvim_set_hl(
-						0,
-						"HighlightCursorUrl",
-						{ underline = highlight_url.underline, fg = highlight_url.fg, bg = highlight_url.bg }
-					)
+					M.change_color_highlight(user_opts, "HighlightCursorUrl")
 				end,
 			})
 		else
-			api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
+			api.nvim_create_autocmd({ "VimEnter", "BufEnter" }, {
 				desc = "URL Highlighting",
 				group = api.nvim_create_augroup("HightlightAllUrl", { clear = true }),
-				callback = function() handlers.set_url_effect() end,
+				callback = function()
+					handlers.set_url_effect()
+					M.change_color_highlight(user_opts, "HighlightAllUrl")
+				end,
 			})
 		end
 	end
+end
+
+--- Change the color of the highlight
+-- @tparam table user_opts : The user options
+-- @tparam string group_name : The name of the highlight group
+-- @treturn nil
+-- @see url-open.modules.handlers.highlight_cursor_url
+-- @see url-open.modules.handlers.set_url_effect
+-- @see url-open.modules.autocmd.setup
+-- @see url-open.setup
+M.change_color_highlight = function(user_opts, group_name)
+	local highlight_url = user_opts.highlight_url
+
+	local opts = {}
+	for k, v in pairs(highlight_url) do
+		if k ~= "enabled" and k ~= "cursor_only" then opts[k] = v end
+	end
+
+	api.nvim_set_hl(0, group_name, opts)
 end
 
 return M

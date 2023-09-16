@@ -158,7 +158,7 @@ end
 
 --- Add syntax matching rules for highlighting URLs/URIs.
 -- @see url-open.modules.patterns
-M.set_url_effect = function()
+M.set_url_effect = function(user_opts)
 	M.delete_url_effect()
 	fn.matchadd("HighlightAllUrl", patterns_module.DEEP_PATTERN, 15)
 end
