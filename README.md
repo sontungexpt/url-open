@@ -94,6 +94,7 @@ require("url_open").setup({
 		fg = "#199bff",
 		bg = nil, -- transparent
 		underline = true,
+		-- more_customize via vim.api.nvim_set_hl
 	},
 	deep_pattern = false,
 	extra_patterns = {
