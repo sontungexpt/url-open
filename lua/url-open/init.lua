@@ -123,7 +123,7 @@ local open_url = function(user_opts)
 
 	while url do
 		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos and cursor_col < end_pos then
+			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
 				url_to_open = url
 				break
 			end
@@ -215,7 +215,7 @@ local function highlight_cursor_url(user_opts)
 		-- clear the other highlight url to make sure only one url is highlighted
 		api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
 		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos and cursor_col < end_pos then
+			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
 				api.nvim_buf_add_highlight(
 					0,
 					cursor_url_hightlight_id,
