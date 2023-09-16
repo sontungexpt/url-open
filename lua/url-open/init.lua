@@ -170,7 +170,7 @@ local open_url = function(user_opts)
 			if fn.executable(user_opts.open_app) == 1 then
 				command = "silent! !" .. user_opts.open_app .. " " .. shell_safe_url
 			else
-				error("Unknown application", { title = "URL Handler" })
+				error("Unknown application to open url", { title = "URL Handler" })
 				return
 			end
 		end
