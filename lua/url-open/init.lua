@@ -268,7 +268,7 @@ local init_autocmd = function(user_opts)
 				end,
 			})
 		else
-			api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+			api.nvim_create_autocmd({ "VimEnter", "FileType", "BufEnter", "WinEnter" }, {
 				desc = "URL Highlighting",
 				group = api.nvim_create_augroup("HightlightAllUrl", { clear = true }),
 				callback = function()
