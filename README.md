@@ -3,6 +3,10 @@
 This plugin allow you to open url under cursor in neovim without netrw with
 default browser of your system.
 
+NOTE: Since I am the linux user so i only test this plugin on linux, if you
+are using macos or windows and you have any problem with this plugin, please
+open an issue or create a pull request to fix it
+
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
