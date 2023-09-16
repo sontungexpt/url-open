@@ -160,7 +160,7 @@ end
 -- @see url-open.modules.patterns
 M.set_url_effect = function(user_opts)
 	M.delete_url_effect()
-	fn.matchadd("HighlightAllUrl", patterns_module.DEEP_PATTERN, 15)
+	fn.matchadd("HighlightAllUrl", patterns_module.DEEP_PATTERN, -1)
 end
 
 --- Highlight the url under the cursor
