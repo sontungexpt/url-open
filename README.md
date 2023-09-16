@@ -43,6 +43,10 @@ open an issue or create a pull request to fix it
 
 ![hightlight-url](./docs/readme/preview1.png)
 
+![hightlight-all-url](./docs/readme/preview2.png)
+
+![hightlight-when-cursor-on](./docs/readme/preview.mp4)
+
 ## Installation
 
 ```lua
