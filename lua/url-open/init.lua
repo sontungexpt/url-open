@@ -19,6 +19,7 @@ local error = function(msg, opts)
 end
 
 local DEFAULT_OPTIONS = {
+	open_app = "default",
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
 		enabled = true,
@@ -137,32 +138,36 @@ local open_url = function(user_opts)
 	if url_to_open then
 		local shell_safe_url = fn.shellescape(url_to_open)
 		local command = ""
-		if vim.loop.os_uname().sysname == "Linux" then
-			if fn.executable("xdg-open") == 1 then
-				command = "silent! !xdg-open " .. shell_safe_url
-			elseif fn.executable("gnome-open") then
-				command = "silent! !gnome-open " .. shell_safe_url
+		if user_opts.open_app == "default" or user_opts.open_app == "" then
+			if vim.loop.os_uname().sysname == "Linux" then
+				if fn.executable("xdg-open") == 1 then
+					command = "silent! !xdg-open " .. shell_safe_url
+				elseif fn.executable("gnome-open") then
+					command = "silent! !gnome-open " .. shell_safe_url
+				else
+					error("Unknown command to open url on Linux", { title = "URL Handler" })
+					return
+				end
+			elseif vim.loop.os_uname().sysname == "Darwin" then
+				if fn.executable("open") == 1 then
+					command = "silent! !open " .. shell_safe_url
+				else
+					error("Unknown command to open url on MacOS", { title = "URL Handler" })
+					return
+				end
+			elseif vim.loop.os_uname().sysname == "Windows" then
+				if fn.executable("start") == 1 then
+					command = "silent! !start " .. shell_safe_url
+				else
+					error("Unknown command to open url on Windows", { title = "URL Handler" })
+					return
+				end
 			else
-				error("Unknown command to open url on Linux", { title = "URL Handler" })
-				return
-			end
-		elseif vim.loop.os_uname().sysname == "Darwin" then
-			if fn.executable("open") == 1 then
-				command = "silent! !open " .. shell_safe_url
-			else
-				error("Unknown command to open url on MacOS", { title = "URL Handler" })
-				return
-			end
-		elseif vim.loop.os_uname().sysname == "Windows" then
-			if fn.executable("start") == 1 then
-				command = "silent! !start " .. shell_safe_url
-			else
-				error("Unknown command to open url on Windows", { title = "URL Handler" })
+				error("Unknown operating system.", { title = "URL Handler" })
 				return
 			end
 		else
-			error("Unknown operating system.", { title = "URL Handler" })
-			return
+			command = "silent! !" .. user_opts.open_app .. " " .. shell_safe_url
 		end
 		call_cmd(command, {
 			success = "Opening " .. url_to_open .. " successfully.",
