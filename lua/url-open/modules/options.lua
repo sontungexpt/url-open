@@ -1,6 +1,7 @@
 --- Provide options for the plugin
 --
 local M = {}
+local validate = vim.validate
 
 --- Default options
 -- @field open_only_when_cursor_on_url: boolean : Open url only when cursor on url
@@ -14,6 +15,7 @@ local M = {}
 -- @field extra_patterns: table : Extra patterns to match
 -- @table DEFAULT_OPTIONS
 M.DEFAULT_OPTIONS = {
+	open_app = "default",
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
 		enabled = true,
@@ -41,10 +43,11 @@ M.DEFAULT_OPTIONS = {
 -- @see DEFAULT_OPTIONS
 M.validate_opts = function(opts)
 	local success, error_msg = pcall(function()
-		vim.validate { opts = { opts, "table", true } }
+		validate { opts = { opts, "table", true } }
 
 		if opts then
-			vim.validate {
+			validate {
+				open_app = { opts.open_app, "string", true },
 				open_only_when_cursor_on_url = { opts.open_only_when_cursor_on_url, "boolean", true },
 				highlight_url = {
 					opts.highlight_url,
@@ -58,7 +61,7 @@ M.validate_opts = function(opts)
 
 		if opts.extra_patterns then
 			for pattern, sub in pairs(opts.extra_patterns) do
-				vim.validate {
+				validate {
 					pattern = { pattern, "string" },
 					sub = { sub, { "table", "string" } },
 				}
@@ -66,7 +69,7 @@ M.validate_opts = function(opts)
 		end
 
 		if opts.highlight_url then
-			vim.validate {
+			validate {
 				enabled = { opts.highlight_url.enabled, "boolean" },
 				cursor_only = { opts.highlight_url.cursor_only, "boolean" },
 				fg = { opts.highlight_url.fg, "string", true },
