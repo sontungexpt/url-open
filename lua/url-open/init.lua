@@ -167,7 +167,12 @@ local open_url = function(user_opts)
 				return
 			end
 		else
-			command = "silent! !" .. user_opts.open_app .. " " .. shell_safe_url
+			if fn.executable(user_opts.open_app) == 1 then
+				command = "silent! !" .. user_opts.open_app .. " " .. shell_safe_url
+			else
+				error("Unknown application", { title = "URL Handler" })
+				return
+			end
 		end
 		call_cmd(command, {
 			success = "Opening " .. url_to_open .. " successfully.",
