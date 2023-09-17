@@ -18,11 +18,18 @@ M.DEFAULT_OPTIONS = {
 	open_app = "default",
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
-		enabled = true,
-		cursor_only = true, -- highlight only when cursor on url or highlight all urls
-		fg = "#199bff",
-		bg = nil, -- transparent
-		underline = true,
+		all_urls = {
+			enabled = false,
+			fg = "#19d5ff", -- nil will use default color
+			bg = nil, -- transparent
+			underline = true,
+		},
+		cursor_move = {
+			enabled = true,
+			fg = "#199eff", -- nil will use default color
+			bg = nil, -- transparent
+			underline = true,
+		},
 	},
 	deep_pattern = false,
 	extra_patterns = {
@@ -70,12 +77,27 @@ M.validate_opts = function(opts)
 
 		if opts.highlight_url then
 			validate {
-				enabled = { opts.highlight_url.enabled, "boolean" },
-				cursor_only = { opts.highlight_url.cursor_only, "boolean" },
-				fg = { opts.highlight_url.fg, "string", true },
-				bg = { opts.highlight_url.bg, "string", true },
-				underline = { opts.highlight_url.underline, "boolean", true },
+				all_urls = { opts.highlight_url.all_urls, "table", true },
+				cursor_move = { opts.highlight_url.cursor_move, "table", true },
 			}
+
+			if opts.highlight_url.all_urls then
+				validate {
+					enabled = { opts.highlight_url.enabled, "boolean", true },
+					fg = { opts.highlight_url.fg, "string", true },
+					bg = { opts.highlight_url.bg, "string", true },
+					underline = { opts.highlight_url.underline, "boolean", true },
+				}
+			end
+
+			if opts.highlight_url.cursor_move then
+				validate {
+					enabled = { opts.highlight_url.enabled, "boolean", true },
+					fg = { opts.highlight_url.fg, "string", true },
+					bg = { opts.highlight_url.bg, "string", true },
+					underline = { opts.highlight_url.underline, "boolean", true },
+				}
+			end
 		end
 	end)
 
