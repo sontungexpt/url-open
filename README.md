@@ -47,6 +47,10 @@ open an issue or create a pull request to fix it
 
 https://github.com/sontungexpt/url-open/assets/92097639/9b4fe61a-b948-470c-a1df-cd16dea706e7
 
+
+https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-e16205fd00f9
+
+
 ## Installation
 
 ```lua
