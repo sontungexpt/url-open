@@ -6,7 +6,6 @@ local fn = vim.fn
 
 local patterns_module = require("url-open.modules.patterns")
 local logger = require("url-open.modules.logger")
-local cursor_url_hightlight_id = api.nvim_create_namespace("HighlightCursorUrl")
 
 local M = {}
 
@@ -159,16 +158,16 @@ M.open_url = function(user_opts)
 end
 
 --- Delete the syntax matching rules for URLs/URIs if set.
-M.delete_url_effect = function()
+M.delete_url_effect = function(group_name)
 	for _, match in ipairs(fn.getmatches()) do
-		if match.group == "HighlightAllUrl" then fn.matchdelete(match.id) end
+		if match.group == group_name then fn.matchdelete(match.id) end
 	end
 end
 
 --- Add syntax matching rules for highlighting URLs/URIs.
 -- @see url-open.modules.patterns
 M.set_url_effect = function(user_opts)
-	M.delete_url_effect()
+	M.delete_url_effect("HighlightAllUrl")
 	fn.matchadd("HighlightAllUrl", patterns_module.DEEP_PATTERN, 15)
 end
 
@@ -177,7 +176,7 @@ end
 -- @see url-open.modules.patterns
 M.highlight_cursor_url = function(user_opts)
 	-- clear old highlight when moving cursor
-	api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+	M.delete_url_effect("HighlightCursorUrl")
 
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_row = cursor_pos[1]
@@ -188,28 +187,14 @@ M.highlight_cursor_url = function(user_opts)
 
 	while url do
 		-- clear the other highlight url to make sure only one url is highlighted
-		api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+		M.delete_url_effect("HighlightCursorUrl")
 		if user_opts.open_only_when_cursor_on_url then
 			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
-				api.nvim_buf_add_highlight(
-					0,
-					cursor_url_hightlight_id,
-					"HighlightCursorUrl",
-					cursor_row - 1,
-					start_pos - 1,
-					end_pos
-				)
+				fn.matchaddpos("HighlightCursorUrl", { { cursor_row, start_pos, end_pos - start_pos + 1 } }, 20)
 				break
 			end
 		else
-			api.nvim_buf_add_highlight(
-				0,
-				cursor_url_hightlight_id,
-				"HighlightCursorUrl",
-				cursor_row - 1,
-				start_pos - 1,
-				end_pos
-			)
+			fn.matchaddpos("HighlightCursorUrl", { { cursor_row, start_pos, end_pos - start_pos + 1 } }, 20)
 		end
 
 		--if cursor_col >= start_pos and cursor_col < end_pos then break end
