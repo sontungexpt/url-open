@@ -83,19 +83,19 @@ M.validate_opts = function(opts)
 
 			if opts.highlight_url.all_urls then
 				validate {
-					enabled = { opts.highlight_url.enabled, "boolean", true },
-					fg = { opts.highlight_url.fg, "string", true },
-					bg = { opts.highlight_url.bg, "string", true },
-					underline = { opts.highlight_url.underline, "boolean", true },
+					enabled = { opts.highlight_url.all_urls.enabled, "boolean", true },
+					fg = { opts.highlight_url.all_urls.fg, "string", true },
+					bg = { opts.highlight_url.all_urls.bg, "string", true },
+					underline = { opts.highlight_url.all_urls.underline, "boolean", true },
 				}
 			end
 
 			if opts.highlight_url.cursor_move then
 				validate {
-					enabled = { opts.highlight_url.enabled, "boolean", true },
-					fg = { opts.highlight_url.fg, "string", true },
-					bg = { opts.highlight_url.bg, "string", true },
-					underline = { opts.highlight_url.underline, "boolean", true },
+					enabled = { opts.highlight_url.cursor_move.enabled, "boolean", true },
+					fg = { opts.highlight_url.cursor_move.fg, "string", true },
+					bg = { opts.highlight_url.cursor_move.bg, "string", true },
+					underline = { opts.highlight_url.cursor_move.underline, "boolean", true },
 				}
 			end
 		end
