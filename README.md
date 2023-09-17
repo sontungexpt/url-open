@@ -18,7 +18,7 @@ open an issue or create a pull request to fix it
 
 ## Features
 
-- Highlight all urls in the buffer or highlight only url that can be opened
+- Highlight all urls in the buffer and highlight url that can be opened when cursor move over it
 - Open the url under cursor include markdown link (e.g. `https://github.com/sontungexpt/url-open`)
 - Open the github page of neovim plugin name under cursor (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open")
 - Open the npm package in package.json (e.g. `"lodash": "^4.17.21",`)
@@ -101,12 +101,20 @@ require("url_open").setup({
 	-- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
-		enabled = true,
-		cursor_only = true, -- highlight only when cursor on url or highlight all urls
-		fg = "#199bff",
-		bg = nil, -- transparent
-		underline = true,
-		-- more_customize via vim.api.nvim_set_hl
+		all_urls = {
+			enabled = false,
+			fg = "#19d5ff", -- nil will use default color
+			bg = nil, -- transparent
+			underline = true,
+            -- more_customize via vim.api.nvim_set_hl
+		},
+		cursor_move = {
+			enabled = true,
+			fg = "#199eff", -- nil will use default color
+			bg = nil, -- transparent
+			underline = true,
+            -- more_customize via vim.api.nvim_set_hl
+		},
 	},
 	deep_pattern = false,
 	extra_patterns = {
