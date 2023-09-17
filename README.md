@@ -41,15 +41,13 @@ open an issue or create a pull request to fix it
 
 - Highlight url which can be opened then you can open it by `:OpenUrlUnderCursor`
 
-![hightlight-url](./docs/readme/preview1.png)
+![highlight-url](./docs/readme/preview1.png)
 
-![hightlight-all-url](./docs/readme/preview2.png)
+![highlight-all-url](./docs/readme/preview2.png)
 
 https://github.com/sontungexpt/url-open/assets/92097639/9b4fe61a-b948-470c-a1df-cd16dea706e7
 
-
 https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-e16205fd00f9
-
 
 ## Installation
 
