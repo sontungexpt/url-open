@@ -22,11 +22,18 @@ local DEFAULT_OPTIONS = {
 	open_app = "default",
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
-		enabled = true,
-		fg = "#199bff",
-		bg = nil, -- transparent
-		underline = true,
-		cursor_only = true, -- highlight only when cursor on url or highlight all urls
+		all_urls = {
+			enabled = false,
+			fg = "#19d5ff", -- nil will use default color
+			bg = nil, -- transparent
+			underline = true,
+		},
+		cursor_move = {
+			enabled = true,
+			fg = "#199eff", -- nil will use default color
+			bg = nil, -- transparent
+			underline = true,
+		},
 	},
 	deep_pattern = false,
 	extra_patterns = {
@@ -187,22 +194,20 @@ local init_command = function(user_opts)
 	api.nvim_create_user_command("OpenUrlUnderCursor", function() open_url(user_opts) end, { nargs = 0 })
 end
 
-local delete_url_effect = function()
+local delete_url_effect = function(group_name)
 	for _, match in ipairs(fn.getmatches()) do
-		if match.group == "HighlightAllUrl" then fn.matchdelete(match.id) end
+		if match.group == group_name then fn.matchdelete(match.id) end
 	end
 end
 
 --- Add syntax matching rules for highlighting URLs/URIs.
 local set_url_effect = function()
-	delete_url_effect()
+	delete_url_effect("HighlightAllUrl")
 	fn.matchadd("HighlightAllUrl", DEEP_PATTERN, 15)
 end
 
-local cursor_url_hightlight_id = api.nvim_create_namespace("HighlightCursorUrl")
-
 local function highlight_cursor_url(user_opts)
-	api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+	delete_url_effect("HighlightCursorUrl")
 
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_row = cursor_pos[1]
@@ -213,28 +218,14 @@ local function highlight_cursor_url(user_opts)
 
 	while url do
 		-- clear the other highlight url to make sure only one url is highlighted
-		api.nvim_buf_clear_namespace(0, cursor_url_hightlight_id, 0, -1)
+		delete_url_effect("HighlightCursorUrl")
 		if user_opts.open_only_when_cursor_on_url then
 			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
-				api.nvim_buf_add_highlight(
-					0,
-					cursor_url_hightlight_id,
-					"HighlightCursorUrl",
-					cursor_row - 1,
-					start_pos - 1,
-					end_pos
-				)
+				fn.matchaddpos("HighlightCursorUrl", { { cursor_row, start_pos, end_pos - start_pos + 1 } }, 20)
 				break
 			end
 		else
-			api.nvim_buf_add_highlight(
-				0,
-				cursor_url_hightlight_id,
-				"HighlightCursorUrl",
-				cursor_row - 1,
-				start_pos - 1,
-				end_pos
-			)
+			fn.matchaddpos("HighlightCursorUrl", { { cursor_row, start_pos, end_pos - start_pos + 1 } }, 20)
 		end
 
 		--if cursor_col >= start_pos and cursor_col < end_pos then break end
@@ -245,38 +236,35 @@ local function highlight_cursor_url(user_opts)
 	end
 end
 
-local change_color_highlight = function(user_opts, group_name)
-	local highlight_url = user_opts.highlight_url
-
-	local opts = {}
-	for k, v in pairs(highlight_url) do
-		if k ~= "enabled" and k ~= "cursor_only" then opts[k] = v end
-	end
+local change_color_highlight = function(opts, group_name)
+	opts.enabled = nil
 
 	api.nvim_set_hl(0, group_name, opts)
 end
 
 local init_autocmd = function(user_opts)
-	if user_opts.highlight_url.enabled then
-		if user_opts.highlight_url.cursor_only then
-			api.nvim_create_autocmd({ "CursorMoved" }, {
-				desc = "URL Highlighting CursorMoved",
-				group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
-				callback = function()
-					highlight_cursor_url(user_opts)
-					change_color_highlight(user_opts, "HighlightCursorUrl")
-				end,
-			})
-		else
-			api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
-				desc = "URL Highlighting",
-				group = api.nvim_create_augroup("HighlightAllUrl", { clear = true }),
-				callback = function()
-					set_url_effect()
-					change_color_highlight(user_opts, "HighlightAllUrl")
-				end,
-			})
-		end
+	local highlight_url = user_opts.highlight_url
+
+	if highlight_url.all_urls.enabled then
+		api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+			desc = "URL Highlighting",
+			group = api.nvim_create_augroup("HighlightAllUrl", { clear = true }),
+			callback = function()
+				set_url_effect()
+				change_color_highlight(highlight_url.all_urls, "HighlightAllUrl")
+			end,
+		})
+	end
+
+	if highlight_url.cursor_move.enabled then
+		api.nvim_create_autocmd({ "CursorMoved" }, {
+			desc = "URL Highlighting CursorMoved",
+			group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
+			callback = function()
+				highlight_cursor_url(user_opts)
+				change_color_highlight(highlight_url.cursor_move, "HighlightCursorUrl")
+			end,
+		})
 	end
 end
 
