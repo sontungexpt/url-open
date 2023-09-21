@@ -4,30 +4,32 @@ local M = {}
 local validate = vim.validate
 
 --- Default options
---- @field open_app : The app to open the url with
---- @field open_only_when_cursor_on_url: boolean : Open url only when cursor on url
---- @field highlight_url.enabled: boolean : Enable highlight url
---- @field highlight_url.fg: string : Change foreground color of the url highlight
---- @field highlight_url.bg: string : Change background color of the url highlight
---- @field highlight_url.underline: boolean : Change underline of the url highlight
---- @field highlight_url.cursor_only: boolean : Highlight only when cursor on url or highlight all urls
---- @field deep_pattern: boolean : Enable deep pattern
---- @field extra_patterns: table : Extra patterns to match
 --- @table DEFAULT_OPTIONS
+--  @field open_app string : The app to open the url with
+--  @field open_only_when_cursor_on_url boolean : Open url only when cursor on url
+--  @field highlight_url.enabled boolean : Enable highlight url
+--  @field highlight_url.fg string : Change foreground color of the url highlight
+--  @field highlight_url.bg string : Change background color of the url highlight
+--  @field highlight_url.underline boolean : Change underline of the url highlight
+--  @field highlight_url.cursor_only boolean : Highlight only when cursor on url or highlight all urls
+--  @field deep_pattern boolean : Enable deep pattern
+--  @field extra_patterns table : Extra patterns to match
 M.DEFAULT_OPTIONS = {
 	open_app = "default",
 	open_only_when_cursor_on_url = false,
 	highlight_url = {
 		all_urls = {
 			enabled = false,
-			fg = "#19d5ff", -- nil will use default color
-			bg = nil, -- transparent
+			fg = "#19d5ff", -- "text" or "#rrggbb"
+			-- fg = "text",
+			bg = nil, -- nil or "#rrggbb"
 			underline = true,
 		},
 		cursor_move = {
 			enabled = true,
-			fg = "#199eff", -- nil will use default color
-			bg = nil, -- transparent
+			fg = "#199eff", -- "text" or "#rrggbb"
+			-- fg = "text",
+			bg = nil, -- nil or "#rrggbb"
 			underline = true,
 		},
 	},
@@ -37,17 +39,17 @@ M.DEFAULT_OPTIONS = {
 		-- [pattern] = {prefix = "", suffix = ""},
 		--
 		-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
-		-- so the url will be https://www.npmjs.com/package/<pattern found>
+		-- so the url will be https://www.npmjs.com/package/[pattern_found]
 		--
 		-- Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-		-- so the url will be https://www.npmjs.com/package/<pattern found>/issues
+		-- so the url will be https://www.npmjs.com/package/[pattern_found]/issues
 	},
 }
 
 --- Validate options
--- @tparam table opts : Options to validate
--- @return table: Validated options
--- @see DEFAULT_OPTIONS
+--- @tparam table opts : Options to validate
+--- @return table|nil: Validated options
+--- @see DEFAULT_OPTIONS
 M.validate_opts = function(opts)
 	local success, error_msg = pcall(function()
 		validate { opts = { opts, "table", true } }
