@@ -121,13 +121,28 @@ require("url_open").setup({
 	deep_pattern = false,
 	extra_patterns = {
 		-- [pattern] = prefix: string only or nil
-		-- [pattern] = {prefix = "", suffix = ""},
+		-- [pattern] = {
+		--      prefix = "",
+		--      suffix = ""
+	    -- 	    file_patterns = { "package%.json" },
+        -- 	    excluded_file_patterns = {},
+        -- 	    extra_condition = function() return true end, -- need to return boolean
+	    -- },
 		--
 		-- E.g: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
 		-- so the url will be https://www.npmjs.com/package/<pattern found>
 		--
 		-- E.g: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
 		-- so the url will be https://www.npmjs.com/package/<pattern found>/issues
+
+        -- E.g
+	    -- ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+	    -- 	    prefix = "https://www.npmjs.com/package/",
+	    -- 	    suffix = "",
+	    -- 	    file_patterns = { "package%.json" },
+        -- 	    excluded_file_patterns = {},
+        -- 	    extra_condition = function() return true end, -- need to return boolean
+        -- }, --- npm package
 	},
 })
 ```
