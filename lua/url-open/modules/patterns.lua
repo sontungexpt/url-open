@@ -36,8 +36,21 @@ M.DEEP_PATTERN =
 --
 M.PATTERNS = {
 	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --- url http(s)
-	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
-	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/", --- plugin name git
+	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
+	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+		prefix = "https://www.npmjs.com/package/",
+		suffix = "",
+		file_patterns = { "package%.json" },
+		excluded_file_patterns = {},
+		extra_condition = function() return true end,
+	}, --- npm package
+	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
+		prefix = "https://github.com/",
+		suffix = "",
+		file_patterns = {},
+		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
+		extra_condition = function() return true end,
+	}, --- plugin name git
 	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --- brew formula
 	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", --- cask formula
 }
