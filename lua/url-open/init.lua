@@ -36,27 +36,30 @@ local DEFAULT_OPTIONS = {
 		},
 	},
 	deep_pattern = false,
-	extra_patterns = {
-		-- [pattern] = prefix: string only or nil
-		-- [pattern] = {prefix = "", suffix = ""},
-		--
-		-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
-		-- so the url will be https://www.npmjs.com/package/<pattern found>
-		--
-		-- Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-		-- so the url will be https://www.npmjs.com/package/<pattern found>/issues
-	},
+	extra_patterns = {},
 }
 
 local DEEP_PATTERN =
 	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
 local PATTERNS = {
-	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --url http(s)
-	['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --npm package
-	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = "https://github.com/", --plugin name git
-	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --brew formula
-	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", -- cask formula
+	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --- url http(s)
+	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
+	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+		prefix = "https://www.npmjs.com/package/",
+		suffix = "",
+		file_patterns = { "package%.json" },
+		-- excluded_file_patterns = {},
+	}, --- npm package
+	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
+		prefix = "https://github.com/",
+		suffix = "",
+		-- file_patterns = {},
+		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
+		-- extra_condition = function() return true end,
+	}, --- plugin name git
+	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --- brew formula
+	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", --- cask formula
 }
 
 local call_cmd = function(command, msg)
@@ -76,42 +79,66 @@ local call_cmd = function(command, msg)
 	end
 end
 
-local find_url = function(user_opts, text, start_pos)
-	start_pos = start_pos or 1
+local check_file_patterns = function(file_patterns, is_excluded)
+	if type(file_patterns) == "string" then file_patterns = { file_patterns } end
+	if file_patterns == nil or #file_patterns == 0 then return not is_excluded end
 
-	local min_start_pos_found = string.len(text)
+	local file_path = api.nvim_buf_get_name(0)
+	for _, pattern in ipairs(file_patterns) do
+		if file_path:match(pattern) then return true end
+	end
+	return false
+end
+
+local find_first_url_matching_patterns = function(text, patterns, start_pos, found_url_smaller_pos)
+	found_url_smaller_pos = found_url_smaller_pos or string.len(text)
+	start_pos = start_pos or 1
 	local start_found, end_found, url_found = nil, nil, nil
-	for pattern, prefix in pairs(PATTERNS) do
-		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-		if url and min_start_pos_found > start_pos_result then
-			min_start_pos_found = start_pos_result
-			url = prefix .. url
-			start_found, end_found, url_found = start_pos_result, end_pos_result, url
+
+	for pattern, subs in pairs(patterns) do
+		subs = subs or { prefix = "" }
+		if type(subs) == "string" then subs = { prefix = subs } end -- support old version
+
+		local extra_condition = subs.extra_condition
+		if extra_condition and type(extra_condition) == "function" then
+			extra_condition = extra_condition()
+		else
+			extra_condition = true
+		end
+
+		if type(extra_condition) ~= "boolean" then extra_condition = true end
+		if
+			not check_file_patterns(subs.excluded_file_patterns, true)
+			and check_file_patterns(subs.file_patterns)
+			and extra_condition
+		then
+			local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
+			if url and found_url_smaller_pos > start_pos_result then
+				found_url_smaller_pos = start_pos_result
+				url = (subs.prefix or "") .. url .. (subs.suffix or "")
+				start_found, end_found, url_found = start_pos_result, end_pos_result, url
+			end
 		end
 	end
+	return start_found, end_found, url_found
+end
 
-	-- check extra patterns
-	for pattern, subs in pairs(user_opts.extra_patterns) do
-		local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-		if url and min_start_pos_found > start_pos_result then
-			min_start_pos_found = start_pos_result
-			subs = subs or ""
-			if type(subs) == "string" then
-				url = subs .. url
-			else
-				url = (subs.prefix or "") .. url .. (subs.suffix or "")
-			end
-			start_found, end_found, url_found = start_pos_result, end_pos_result, url
-		end
+local find_first_url_in_text = function(user_opts, text, start_pos)
+	local start_found, end_found, url_found = find_first_url_matching_patterns(text, PATTERNS, start_pos)
+
+	local extra_start_found, extra_end_found, extra_url_found =
+		find_first_url_matching_patterns(text, user_opts.extra_patterns, start_pos, start_found)
+
+	if extra_start_found then
+		start_found, end_found, url_found = extra_start_found, extra_end_found, extra_url_found
 	end
 
 	-- fallback to deep pattern
 	if user_opts.deep_pattern then
 		local results = fn.matchstrpos(text, DEEP_PATTERN, start_pos)
 		-- result[1] is url, result[2] is start_pos, result[3] is end_pos
-		if results[1] ~= "" and min_start_pos_found > results[2] then
-			min_start_pos_found = results[2]
-			start_found, end_found, url_found = results[2], results[3], results[1]
+		if results[1] ~= "" and (start_found or string.len(text)) > results[2] + 1 then
+			start_found, end_found, url_found = results[2] + 1, results[3], results[1]
 		end
 	end
 
@@ -126,7 +153,7 @@ local open_url = function(user_opts)
 	local url_to_open = nil
 
 	-- get the first url in the line
-	local start_pos, end_pos, url = find_url(user_opts, line)
+	local start_pos, end_pos, url = find_first_url_in_text(user_opts, line)
 
 	while url do
 		if user_opts.open_only_when_cursor_on_url then
@@ -139,7 +166,7 @@ local open_url = function(user_opts)
 		end
 		if cursor_col < end_pos then break end
 		-- find the next url
-		start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
+		start_pos, end_pos, url = find_first_url_in_text(user_opts, line, end_pos + 1)
 	end
 
 	if url_to_open then
@@ -214,7 +241,7 @@ local function highlight_cursor_url(user_opts)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
 
-	local start_pos, end_pos, url = find_url(user_opts, line)
+	local start_pos, end_pos, url = find_first_url_in_text(user_opts, line)
 
 	while url do
 		-- clear the other highlight url to make sure only one url is highlighted
@@ -232,7 +259,7 @@ local function highlight_cursor_url(user_opts)
 		-- end pos is the next char after the url
 		if cursor_col < end_pos then break end
 		-- find the next url
-		start_pos, end_pos, url = find_url(user_opts, line, end_pos + 1)
+		start_pos, end_pos, url = find_first_url_in_text(user_opts, line, end_pos + 1)
 	end
 end
 
