@@ -124,8 +124,8 @@ require("url_open").setup({
 		-- [pattern] = {
 		--      prefix = "",
 		--      suffix = ""
-	    -- 	    file_patterns = { "package%.json" },
-        -- 	    excluded_file_patterns = {},
+	    -- 	    file_patterns = { "package%.json" }, -- the pattern to match with full path of file
+        -- 	    excluded_file_patterns = {}, -- the pattern to exclude file full path
         -- 	    extra_condition = function() return true end, -- need to return boolean
 	    -- },
 		--
