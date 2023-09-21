@@ -58,6 +58,10 @@
 <p>This plugin allow you to open url under cursor in neovim without netrw with
 default browser of your system.</p>
 
+<p>NOTE: Since I am the linux user so i only test this plugin on linux, if you
+are using macos or windows and you have any problem with this plugin, please
+open an issue or create a pull request to fix it</p>
+
 <ul>
     <li><a href="#features">Features</a></li>
     <li><a href="#installation">Installation</a></li>
@@ -74,7 +78,7 @@ default browser of your system.</p>
 <h2>Features</h2>
 
 <ul>
-    <li>Highlight all urls in the buffer or highlight only url that can be opened</li>
+    <li>Highlight all urls in the buffer and highlight url that can be opened when cursor move over it</li>
     <li>Open the url under cursor include markdown link (e.g. <code>https://github.com/sontungexpt/url-open</code>)</li>
     <li>Open the github page of neovim plugin name under cursor (e.g. <code>Plug &apos;nvim-lua/plenary.nvim&apos;</code>, "sontungexpt/url-open")</li>
     <li>Open the npm package in package.json (e.g. <code>&quot;lodash&quot;: &quot;^4.17.21&quot;,</code>)</li>
@@ -100,7 +104,13 @@ default browser of your system.</p>
     <li>Highlight url which can be opened then you can open it by <code>:OpenUrlUnderCursor</code></li>
 </ul>
 
-<p><img src="./docs/readme/preview1.png" alt="hightlight-url"/></p>
+<p><img src="./docs/readme/preview1.png" alt="highlight-url"/></p>
+
+<p><img src="./docs/readme/preview2.png" alt="highlight-all-url"/></p>
+
+<p>https://github.com/sontungexpt/url-open/assets/92097639/9b4fe61a-b948-470c-a1df-cd16dea706e7</p>
+
+<p>https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-e16205fd00f9</p>
 
 <h2>Installation</h2>
 
@@ -157,25 +167,53 @@ default browser of your system.</p>
     <span class="comment">-- if true, only open url when cursor in the middle of url
 </span>    <span class="comment">-- if false, open next url found from cursor position it means you can open
 </span>    <span class="comment">-- url even when the cursor is in front of url or in the middle of url
-</span> open_only_when_cursor_on_url = <span class="keyword">false</span>,
+</span>    open_app = <span class="string">"default"</span>,
+    <span class="comment">-- default will open url with default browser of your system or you can choose your browser like this
+</span>    <span class="comment">-- open_app = "micorsoft-edge-stable",
+</span>    <span class="comment">-- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
+</span>    open_only_when_cursor_on_url = <span class="keyword">false</span>,
     highlight_url = {
-        enabled = <span class="keyword">true</span>,
-        cursor_only = <span class="keyword">true</span>, <span class="comment">-- highlight only when cursor on url or highlight all urls
-</span>     fg = <span class="string">"#199bff"</span>,
-        bg = <span class="keyword">nil</span>, <span class="comment">-- transparent
-</span>     underline = <span class="keyword">true</span>,
+        all_urls = {
+            enabled = <span class="keyword">false</span>,
+            fg = <span class="string">"#19d5ff"</span>, <span class="comment">-- nil will use default color
+</span>            bg = <span class="keyword">nil</span>, <span class="comment">-- transparent
+</span>            underline = <span class="keyword">true</span>,
+            <span class="comment">-- more_customize via vim.api.nvim_set_hl
+</span>        },
+        cursor_move = {
+            enabled = <span class="keyword">true</span>,
+            fg = <span class="string">"#199eff"</span>, <span class="comment">-- nil will use default color
+</span>            bg = <span class="keyword">nil</span>, <span class="comment">-- transparent
+</span>            underline = <span class="keyword">true</span>,
+            <span class="comment">-- more_customize via vim.api.nvim_set_hl
+</span>        },
     },
     deep_pattern = <span class="keyword">false</span>,
     extra_patterns = {
         <span class="comment">-- [pattern] = prefix: string only or nil
-</span>     <span class="comment">-- [pattern] = {prefix = "", suffix = ""},
-</span>     <span class="comment">--
-</span>     <span class="comment">-- E.g: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
-</span>     <span class="comment">-- so the url will be https://www.npmjs.com/package/&lt;pattern found&gt;
-</span>     <span class="comment">--
-</span>     <span class="comment">-- E.g: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-</span>     <span class="comment">-- so the url will be https://www.npmjs.com/package/&lt;pattern found&gt;/issues
-</span> },
+</span>        <span class="comment">-- [pattern] = {
+</span>        <span class="comment">--      prefix = "",
+</span>        <span class="comment">--      suffix = ""
+</span>        <span class="comment">--      file_patterns = { "package%.json" }, -- the pattern to match with full path of file
+</span>        <span class="comment">--      excluded_file_patterns = {}, -- the pattern to exclude file full path
+</span>        <span class="comment">--      extra_condition = function() return true end, -- need to return boolean
+</span>        <span class="comment">-- },
+</span>
+        <span class="comment">-- E.g: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
+</span>        <span class="comment">-- so the url will be https://www.npmjs.com/package/&lt;pattern found&gt;
+</span>
+        <span class="comment">-- E.g: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
+</span>        <span class="comment">-- so the url will be https://www.npmjs.com/package/&lt;pattern found&gt;/issues
+</span>
+        <span class="comment">-- E.g:
+</span>        <span class="comment">-- ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+</span>        <span class="comment">--      prefix = "https://www.npmjs.com/package/",
+</span>        <span class="comment">--      suffix = "",
+</span>        <span class="comment">--      file_patterns = { "package%.json" },
+</span>        <span class="comment">--      excluded_file_patterns = {},
+</span>        <span class="comment">--      extra_condition = function() return true end, -- need to return boolean
+</span>        <span class="comment">-- },
+</span>    },
 })
 </pre>
 
@@ -206,7 +244,7 @@ vim.keymap.<span class="function-name">set</span>(<span class="string">"n"</span
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-16 11:05:12 </i>
+<i style="float:right;">Last updated 2023-09-21 15:18:31 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 

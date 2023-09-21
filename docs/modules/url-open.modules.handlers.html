@@ -70,12 +70,20 @@
 	<td class="summary">Call a vim command</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#delete_url_effect">delete_url_effect ()</a></td>
+	<td class="name" nowrap><a href="#check_file_patterns">check_file_patterns (file_patterns, is_excluded)</a></td>
+	<td class="summary">Check if the file path matches any of the patterns</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#delete_url_effect">delete_url_effect (group_name)</a></td>
 	<td class="summary">Delete the syntax matching rules for URLs/URIs if set.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#find_url">find_url (user_opts, text, start_pos)</a></td>
+	<td class="name" nowrap><a href="#find_first_url_in_text">find_first_url_in_text (user_opts, text, start_pos)</a></td>
 	<td class="summary">Find the first url in the text</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#find_first_url_matching_patterns">find_first_url_matching_patterns (text, patterns, start_pos, found_url_smaller_pos)</a></td>
+	<td class="summary">Check if the text contains any of the patterns</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#highlight_cursor_url">highlight_cursor_url (user_opts)</a></td>
@@ -125,13 +133,52 @@
 
 </dd>
     <dt>
+    <a name = "check_file_patterns"></a>
+    <strong>check_file_patterns (file_patterns, is_excluded)</strong>
+    </dt>
+    <dd>
+    Check if the file path matches any of the patterns
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">file_patterns</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         : Patterns to match the file path
+        </li>
+        <li><span class="parameter">is_excluded</span>
+            <span class="types"><span class="type">boolean</span></span>
+         : If the file path is excluded (optional) (default: false)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        : True if the file path matches any of the patterns, otherwise false
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "delete_url_effect"></a>
-    <strong>delete_url_effect ()</strong>
+    <strong>delete_url_effect (group_name)</strong>
     </dt>
     <dd>
     Delete the syntax matching rules for URLs/URIs if set.
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">group_name</span>
+
+
+
+        </li>
+    </ul>
 
 
 
@@ -139,8 +186,8 @@
 
 </dd>
     <dt>
-    <a name = "find_url"></a>
-    <strong>find_url (user_opts, text, start_pos)</strong>
+    <a name = "find_first_url_in_text"></a>
+    <strong>find_first_url_in_text (user_opts, text, start_pos)</strong>
     </dt>
     <dd>
     Find the first url in the text
@@ -158,15 +205,53 @@
         </li>
         <li><span class="parameter">start_pos</span>
             <span class="types"><span class="type">number</span></span>
-         : Start position to search from (optional) (default: 0)
+         : Start position to search from (optional) (default: 1)
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        start<em>pos, end</em>pos, url: Start position, end position, and url of the first url found (all nil if not found)
+           <span class="types"><span class="type">number</span></span>
+        start<em>pos, number end</em>pos, string url: Start position, end position, and url of the first url found (all nil if not found)
     </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "find_first_url_matching_patterns"></a>
+    <strong>find_first_url_matching_patterns (text, patterns, start_pos, found_url_smaller_pos)</strong>
+    </dt>
+    <dd>
+    Check if the text contains any of the patterns
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">text</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+          : Text to search for patterns
+        </li>
+        <li><span class="parameter">patterns</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         : Patterns to search for urls in the text
+        </li>
+        <li><span class="parameter">start_pos</span>
+            <span class="types"><span class="type">number</span></span>
+         : Start position to search from (optional) (default: 0)
+        </li>
+        <li><span class="parameter">found_url_smaller_pos</span>
+            <span class="types"><span class="type">number</span></span>
+         : The position of the found url must be smaller than this number (optional) (default: string.len(text))
+        </li>
+    </ul>
+
 
 
     <h3>See also:</h3>
@@ -256,7 +341,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-16 11:05:12 </i>
+<i style="float:right;">Last updated 2023-09-21 15:18:31 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 

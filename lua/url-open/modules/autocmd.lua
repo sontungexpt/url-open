@@ -9,11 +9,11 @@ local handlers = require("url-open.modules.handlers")
 local M = {}
 
 --- Setup the autocmds
--- @tparam table user_opts : The user options
--- @treturn nil
--- @see url-open.setup
--- @see url-open.modules.handlers.highlight_cursor_url
--- @see url-open.modules.handlers.set_url_effect
+--- @tparam table user_opts : The user options
+--- @treturn nil
+--- @see url-open.setup
+--- @see url-open.modules.handlers.highlight_cursor_url
+--- @see url-open.modules.handlers.set_url_effect
 M.setup = function(user_opts)
 	local highlight_url = user_opts.highlight_url
 
@@ -41,13 +41,13 @@ M.setup = function(user_opts)
 end
 
 --- Change the color of the highlight
--- @tparam table user_opts : The user options
--- @tparam string group_name : The name of the highlight group
--- @treturn nil
--- @see url-open.modules.handlers.highlight_cursor_url
--- @see url-open.modules.handlers.set_url_effect
--- @see url-open.modules.autocmd.setup
--- @see url-open.setup
+--- @tparam table opts : The user options
+--- @tparam string group_name : The name of the highlight group
+--- @treturn nil
+--- @see url-open.modules.handlers.highlight_cursor_url
+--- @see url-open.modules.handlers.set_url_effect
+--- @see url-open.modules.autocmd.setup
+--- @see url-open.setup
 M.change_color_highlight = function(opts, group_name)
 	opts.enabled = nil
 

@@ -4,16 +4,16 @@ local M = {}
 local validate = vim.validate
 
 --- Default options
--- @field open_only_when_cursor_on_url: boolean : Open url only when cursor on url
--- @field highlight_url: table
--- @field highlight_url.enabled: boolean : Enable highlight url
--- @field highlight_url.fg: string : Change foreground color of the url highlight
--- @field highlight_url.bg: string : Change background color of the url highlight
--- @field highlight_url.underline: boolean : Change underline of the url highlight
--- @field highlight_url.cursor_only: boolean : Highlight only when cursor on url or highlight all urls
--- @field deep_pattern: boolean : Enable deep pattern
--- @field extra_patterns: table : Extra patterns to match
--- @table DEFAULT_OPTIONS
+--- @field open_app : The app to open the url with
+--- @field open_only_when_cursor_on_url: boolean : Open url only when cursor on url
+--- @field highlight_url.enabled: boolean : Enable highlight url
+--- @field highlight_url.fg: string : Change foreground color of the url highlight
+--- @field highlight_url.bg: string : Change background color of the url highlight
+--- @field highlight_url.underline: boolean : Change underline of the url highlight
+--- @field highlight_url.cursor_only: boolean : Highlight only when cursor on url or highlight all urls
+--- @field deep_pattern: boolean : Enable deep pattern
+--- @field extra_patterns: table : Extra patterns to match
+--- @table DEFAULT_OPTIONS
 M.DEFAULT_OPTIONS = {
 	open_app = "default",
 	open_only_when_cursor_on_url = false,
@@ -110,10 +110,10 @@ M.validate_opts = function(opts)
 end
 
 --- Apply user options
--- @tparam table user_opts : User options
--- @return table: Merged options
--- @see DEFAULT_OPTIONS
--- @see validate_opts
+--- @tparam table user_opts : User options
+--- @return table: Merged options
+--- @see DEFAULT_OPTIONS
+--- @see validate_opts
 M.apply_user_options = function(user_opts)
 	user_opts = M.validate_opts(user_opts)
 	return vim.tbl_deep_extend("force", M.DEFAULT_OPTIONS, user_opts or {})

@@ -41,15 +41,14 @@ M.PATTERNS = {
 		prefix = "https://www.npmjs.com/package/",
 		suffix = "",
 		file_patterns = { "package%.json" },
-		excluded_file_patterns = {},
-		extra_condition = function() return true end,
+		-- excluded_file_patterns = {},
 	}, --- npm package
 	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
 		prefix = "https://github.com/",
 		suffix = "",
 		file_patterns = {},
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
-		extra_condition = function() return true end,
+		-- extra_condition = function() return true end,
 	}, --- plugin name git
 	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --- brew formula
 	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", --- cask formula
