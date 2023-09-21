@@ -36,7 +36,8 @@ M.DEEP_PATTERN =
 -- Cask Formula: ['cask ["]([^%s]*)["]']
 --
 M.PATTERNS = {
-	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%[%]#]*)"] = "", --- url http(s)
+	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"] = "", --- url http(s)
+	-- ["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%[%]#]*)"] = "", --- url http(s)
 	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
 	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
 		prefix = "https://www.npmjs.com/package/",
