@@ -54,16 +54,16 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 ```lua
 -- lazy.nvim
 {
-	"sontungexpt/url-open",
+    "sontungexpt/url-open",
     event = "VeryLazy"
-	cmd = "OpenUrlUnderCursor",
-	config = function()
-		local status_ok, url_open = pcall(require, "url-open")
-		if not status_ok then
-			return
-		end
-		url_open.setup ({})
-	end,
+    cmd = "OpenUrlUnderCursor",
+    config = function()
+        local status_ok, url_open = pcall(require, "url-open")
+        if not status_ok then
+            return
+        end
+        url_open.setup ({})
+    end,
 },
 ```
 
@@ -73,17 +73,17 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 ```lua
 -- lazy.nvim
 {
-	"sontungexpt/url-open",
+    "sontungexpt/url-open",
     branch = "mini",
     event = "VeryLazy"
-	cmd = "OpenUrlUnderCursor",
-	config = function()
-		local status_ok, url_open = pcall(require, "url-open")
-		if not status_ok then
-			return
-		end
-		url_open.setup ({})
-	end,
+    cmd = "OpenUrlUnderCursor",
+    config = function()
+        local status_ok, url_open = pcall(require, "url-open")
+        if not status_ok then
+            return
+        end
+        url_open.setup ({})
+    end,
 },
 ```
 
@@ -97,53 +97,53 @@ require("url_open").setup({
     -- if true, only open url when cursor in the middle of url
     -- if false, open next url found from cursor position it means you can open
     -- url even when the cursor is in front of url or in the middle of url
-	open_app = "default",
-	-- default will open url with default browser of your system or you can choose your browser like this
-	-- open_app = "micorsoft-edge-stable",
-	-- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
-	open_only_when_cursor_on_url = false,
-	highlight_url = {
-		all_urls = {
-			enabled = false,
-			fg = "#19d5ff", -- nil will use default color
-			bg = nil, -- transparent
-			underline = true,
+    open_app = "default",
+    -- default will open url with default browser of your system or you can choose your browser like this
+    -- open_app = "micorsoft-edge-stable",
+    -- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
+    open_only_when_cursor_on_url = false,
+    highlight_url = {
+        all_urls = {
+            enabled = false,
+            fg = "#19d5ff", -- nil will use default color
+            bg = nil, -- transparent
+            underline = true,
             -- more_customize via vim.api.nvim_set_hl
-		},
-		cursor_move = {
-			enabled = true,
-			fg = "#199eff", -- nil will use default color
-			bg = nil, -- transparent
-			underline = true,
+        },
+        cursor_move = {
+            enabled = true,
+            fg = "#199eff", -- nil will use default color
+            bg = nil, -- transparent
+            underline = true,
             -- more_customize via vim.api.nvim_set_hl
-		},
-	},
-	deep_pattern = false,
-	extra_patterns = {
-		-- [pattern] = prefix: string only or nil
-		-- [pattern] = {
-		--      prefix = "",
-		--      suffix = ""
-	    -- 	    file_patterns = { "package%.json" }, -- the pattern to match with full path of file
-        -- 	    excluded_file_patterns = {}, -- the pattern to exclude file full path
-        -- 	    extra_condition = function() return true end, -- need to return boolean
-	    -- },
-		--
-		-- E.g: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
-		-- so the url will be https://www.npmjs.com/package/<pattern found>
-		--
-		-- E.g: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-		-- so the url will be https://www.npmjs.com/package/<pattern found>/issues
+        },
+    },
+    deep_pattern = false,
+    extra_patterns = {
+        -- [pattern] = prefix: string only or nil
+        -- [pattern] = {
+        --      prefix = "",
+        --      suffix = ""
+        --      file_patterns = { "package%.json" }, -- the pattern to match with full path of file
+        --      excluded_file_patterns = {}, -- the pattern to exclude file full path
+        --      extra_condition = function() return true end, -- need to return boolean
+        -- },
 
-        -- E.g
-	    -- ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
-	    -- 	    prefix = "https://www.npmjs.com/package/",
-	    -- 	    suffix = "",
-	    -- 	    file_patterns = { "package%.json" },
-        -- 	    excluded_file_patterns = {},
-        -- 	    extra_condition = function() return true end, -- need to return boolean
-        -- }, --- npm package
-	},
+        -- E.g: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
+        -- so the url will be https://www.npmjs.com/package/<pattern found>
+
+        -- E.g: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
+        -- so the url will be https://www.npmjs.com/package/<pattern found>/issues
+
+        -- E.g:
+        -- ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+        --      prefix = "https://www.npmjs.com/package/",
+        --      suffix = "",
+        --      file_patterns = { "package%.json" },
+        --      excluded_file_patterns = {},
+        --      extra_condition = function() return true end, -- need to return boolean
+        -- },
+    },
 })
 ```
 
