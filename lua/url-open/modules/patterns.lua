@@ -14,6 +14,7 @@ local M = {}
 -- @field http://example.com:8080
 -- @field https://www.example.com:8443
 -- @field ftp://ftp.example.com:2121
+
 M.DEEP_PATTERN =
 	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
@@ -35,7 +36,7 @@ M.DEEP_PATTERN =
 -- Cask Formula: ['cask ["]([^%s]*)["]']
 --
 M.PATTERNS = {
-	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --- url http(s)
+	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%[%]#]*)"] = "", --- url http(s)
 	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
 	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
 		prefix = "https://www.npmjs.com/package/",
