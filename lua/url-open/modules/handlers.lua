@@ -109,7 +109,8 @@ M.find_first_url_in_text = function(user_opts, text, start_pos)
 	if user_opts.deep_pattern then
 		local results = fn.matchstrpos(text, patterns_module.DEEP_PATTERN, start_pos)
 		-- result[1] is url, result[2] is start_pos, result[3] is end_pos
-		if results[1] ~= "" and (start_found or string.len(text)) > results[2] + 1 then
+		-- >= to make deep_pattern has higher priority than default patterns
+		if results[1] ~= "" and (start_found or string.len(text)) >= results[2] + 1 then
 			start_found, end_found, url_found = results[2] + 1, results[3], results[1]
 		end
 	end
@@ -244,4 +245,20 @@ M.highlight_cursor_url = function(user_opts)
 		start_pos, end_pos, url = M.find_first_url_in_text(user_opts, line, end_pos + 1)
 	end
 end
+
+--- Change the color of the highlight
+--- @tparam table opts : The user options
+--- @tparam string group_name : The name of the highlight group
+--- @treturn nil
+--- @see url-open.modules.handlers.highlight_cursor_url
+--- @see url-open.modules.handlers.set_url_effect
+--- @see url-open.modules.autocmd.setup
+--- @see url-open.setup
+M.change_color_highlight = function(opts, group_name)
+	opts.enabled = nil
+	-- if opts.fg and opts.fg == "text" then opts.fg = nil end
+
+	api.nvim_set_hl(0, group_name, opts)
+end
+
 return M
