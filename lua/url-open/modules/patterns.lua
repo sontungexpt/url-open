@@ -46,7 +46,7 @@ M.PATTERNS = {
 	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
 		prefix = "https://github.com/",
 		suffix = "",
-		file_patterns = {},
+		-- file_patterns = {},
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
 		-- extra_condition = function() return true end,
 	}, --- plugin name git
