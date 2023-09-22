@@ -105,17 +105,17 @@ require("url_open").setup({
     highlight_url = {
         all_urls = {
             enabled = false,
-            fg = "#19d5ff", -- nil will use default color
-            bg = nil, -- transparent
+            fg = "#21d5ff", -- "text" or "#rrggbb"
+            -- fg = "text", -- text will set underline same color with text
+            bg = nil, -- nil or "#rrggbb"
             underline = true,
-            -- more_customize via vim.api.nvim_set_hl
         },
         cursor_move = {
             enabled = true,
-            fg = "#199eff", -- nil will use default color
-            bg = nil, -- transparent
+            fg = "#199eff", -- "text" or "#rrggbb"
+            -- fg = "text", -- text will set underline same color with text
+            bg = nil, -- nil or "#rrggbb"
             underline = true,
-            -- more_customize via vim.api.nvim_set_hl
         },
     },
     deep_pattern = false,
