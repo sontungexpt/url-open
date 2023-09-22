@@ -273,21 +273,7 @@ local init_autocmd = function(user_opts)
 	local highlight_url = user_opts.highlight_url
 
 	if highlight_url.all_urls.enabled then
-		local is_loaded = false
-		local cursor_hold_id = 0
-		-- TODO: Need to find a other way to enable command when open neovim
-		cursor_hold_id = api.nvim_create_autocmd({ "CursorHold" }, {
-			desc = "URL Highlighting",
-			group = api.nvim_create_augroup("HighlightAllUrlWhenOpenNeovim", { clear = true }),
-			callback = function()
-				if not is_loaded then
-					api.nvim_command("HighlightAllUrls")
-					is_loaded = true
-				else --remove autocmd after first run
-					api.nvim_del_autocmd(cursor_hold_id)
-				end
-			end,
-		})
+		api.nvim_command("HighlightAllUrls") -- Highlight all urls on startup
 
 		api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
 			desc = "URL Highlighting",
