@@ -35,7 +35,7 @@ M.setup = function(user_opts)
 			end,
 		})
 
-		api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+		api.nvim_create_autocmd({ "BufEnter", "WinEnter", "VimEnter" }, {
 			desc = "URL Highlighting",
 			group = api.nvim_create_augroup("HighlightAllUrl", { clear = true }),
 			command = "HighlightAllUrls",
