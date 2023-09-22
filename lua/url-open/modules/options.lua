@@ -20,7 +20,7 @@ M.DEFAULT_OPTIONS = {
 	highlight_url = {
 		all_urls = {
 			enabled = false,
-			fg = "#19d5ff", -- "text" or "#rrggbb"
+			fg = "#21d5ff", -- "text" or "#rrggbb"
 			-- fg = "text",
 			bg = nil, -- nil or "#rrggbb"
 			underline = true,
@@ -42,7 +42,7 @@ M.DEFAULT_OPTIONS = {
 		-- so the url will be https://www.npmjs.com/package/[pattern_found]
 		--
 		-- Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-		-- so the url will be https://www.npmjs.com/package/[pattern_found]/issues
+		-- so the url will be https://www.npmjs.com/package/<pattern_found>/issues
 	},
 }
 
