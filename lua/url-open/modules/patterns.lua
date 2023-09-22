@@ -23,9 +23,9 @@ M.DEEP_PATTERN =
 --
 -- Format: key: pattern, value: {prefix, suffix} or string prefix.
 --
--- Http(s): ["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"]
+-- Http(s): ["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"]
 --
--- Npm Package: ['["]([^%s]*)["]:']
+-- Npm Package: ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"']
 --
 -- Git Plugin: ["[\"']([^%s~/]*/[^%s~/]*)[\"']"]
 --
