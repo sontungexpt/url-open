@@ -1,9 +1,10 @@
 ## Introduction
 
-This plugin allow you to open url under cursor in neovim without netrw with
-default browser of your system.
+This plugin enables you to effortlessly open the URL under the cursor in Neovim,
+bypassing the need for netrw, and instead utilizing the default browser of your system.
+It provides the convenience of automatically detecting and highlighting all URLs within the text content.
 
-NOTE: Since I am the linux user so i only test this plugin on linux, if you
+**NOTE:** Since I am the linux user so i only test this plugin on linux, if you
 are using macos or windows and you have any problem with this plugin, please
 open an issue or create a pull request to fix it
 
@@ -18,12 +19,15 @@ open an issue or create a pull request to fix it
 
 ## Features
 
-- Highlight all urls in the buffer and highlight url that can be opened when cursor move over it
-- Open the url under cursor include markdown link (e.g. `https://github.com/sontungexpt/url-open`)
-- Open the github page of neovim plugin name under cursor (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open")
-- Open the npm package in package.json (e.g. `"lodash": "^4.17.21",`)
-- Support brew formula, and cask
-- Support deep pattern (disabled by default) to match with url below
+- Automatically detect and highlight all URLs within the text content and
+  provide visual cues when hovering over clickable URLs.
+- Open the URLs under the cursor, including the Markdown link (e.g. `https://github.com/sontungexpt/url-open`).
+- Open the GitHub page for the Neovim plugin mentioned under the cursor
+  (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open").
+- Easily open the npm package specified in the package.json file. (e.g. `"lodash": "^4.17.21",`).
+- Extend support for recognized formats, including brew formulas and casks.
+- Provide an optional deep pattern matching feature,
+  which can be enabled, to accurately identify and handle various URL formats, such as:
   - http://example.com
   - https://www.example.com
   - ftp://ftp.example.com
@@ -35,7 +39,8 @@ open an issue or create a pull request to fix it
   - http://example.com:8080
   - https://www.example.com:8443
   - ftp://ftp.example.com:2121
-- Allow you to open url from anywhere in the line if it only contains 1 url
+- Allow for opening URLs from anywhere on a line, as long as the line contains only one URL.
+  If one line has multiple URLs, the first URLs in the right side of cursor will be opened.
 
 ## Preview
 
