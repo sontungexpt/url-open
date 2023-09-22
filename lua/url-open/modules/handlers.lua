@@ -256,7 +256,7 @@ end
 --- @see url-open.setup
 M.change_color_highlight = function(opts, group_name)
 	opts.enabled = nil
-	-- if opts.fg and opts.fg == "text" then opts.fg = nil end
+	if opts.fg and opts.fg == "text" then opts.fg = nil end
 
 	api.nvim_set_hl(0, group_name, opts)
 end
