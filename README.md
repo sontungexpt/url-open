@@ -129,11 +129,11 @@ require("url_open").setup({
         --      extra_condition = function() return true end, -- need to return boolean
         -- },
 
-        -- E.g: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
-        -- so the url will be https://www.npmjs.com/package/<pattern found>
-
-        -- E.g: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-        -- so the url will be https://www.npmjs.com/package/<pattern found>/issues
+		-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
+		-- so the url will be https://www.npmjs.com/package/[pattern_found]
+		--
+		-- Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
+		-- so the url will be https://www.npmjs.com/package/[pattern_found]/issues
 
         -- E.g:
         -- ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
