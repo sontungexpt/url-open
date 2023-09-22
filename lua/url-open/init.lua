@@ -10,10 +10,6 @@ local info = function(msg, opts)
 	schedule(function() notify(msg, levels.INFO, opts or { title = "Information" }) end)
 end
 
-local warn = function(msg, opts)
-	schedule(function() notify(msg, levels.WARN, opts or { title = "Warning" }) end)
-end
-
 local error = function(msg, opts)
 	schedule(function() notify(msg, levels.ERROR, opts or { title = "Error" }) end)
 end
@@ -40,10 +36,10 @@ local DEFAULT_OPTIONS = {
 }
 
 local DEEP_PATTERN =
-	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
+	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%<>_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%<>_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
 local PATTERNS = {
-	["(https?://[%w-_%.%?%.:/%+=&]+%f[^%w])"] = "", --- url http(s)
+	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"] = "", --- url http(s)
 	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
 	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
 		prefix = "https://www.npmjs.com/package/",
@@ -217,8 +213,10 @@ local open_url = function(user_opts)
 	end
 end
 
-local init_command = function(user_opts)
-	api.nvim_create_user_command("OpenUrlUnderCursor", function() open_url(user_opts) end, { nargs = 0 })
+local change_color_highlight = function(opts, group_name)
+	opts.enabled = nil
+	if opts.fg and opts.fg == "text" then opts.fg = nil end
+	api.nvim_set_hl(0, group_name, opts)
 end
 
 local delete_url_effect = function(group_name)
@@ -231,6 +229,14 @@ end
 local set_url_effect = function()
 	delete_url_effect("HighlightAllUrl")
 	fn.matchadd("HighlightAllUrl", DEEP_PATTERN, 15)
+end
+
+local init_command = function(user_opts)
+	api.nvim_create_user_command("OpenUrlUnderCursor", function() open_url(user_opts) end, { nargs = 0 })
+	api.nvim_create_user_command("HighlightAllUrls", function()
+		set_url_effect()
+		change_color_highlight(user_opts.highlight_url.all_urls, "HighlightAllUrl")
+	end, { nargs = 0 })
 end
 
 local function highlight_cursor_url(user_opts)
@@ -263,23 +269,30 @@ local function highlight_cursor_url(user_opts)
 	end
 end
 
-local change_color_highlight = function(opts, group_name)
-	opts.enabled = nil
-
-	api.nvim_set_hl(0, group_name, opts)
-end
-
 local init_autocmd = function(user_opts)
 	local highlight_url = user_opts.highlight_url
 
 	if highlight_url.all_urls.enabled then
+		local is_loaded = false
+		local cursor_hold_id = 0
+		-- TODO: Need to find a other way to enable command when open neovim
+		cursor_hold_id = api.nvim_create_autocmd({ "CursorHold" }, {
+			desc = "URL Highlighting",
+			group = api.nvim_create_augroup("HighlightAllUrlWhenOpenNeovim", { clear = true }),
+			callback = function()
+				if not is_loaded then
+					api.nvim_command("HighlightAllUrls")
+					is_loaded = true
+				else --remove autocmd after first run
+					api.nvim_del_autocmd(cursor_hold_id)
+				end
+			end,
+		})
+
 		api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
 			desc = "URL Highlighting",
 			group = api.nvim_create_augroup("HighlightAllUrl", { clear = true }),
-			callback = function()
-				set_url_effect()
-				change_color_highlight(highlight_url.all_urls, "HighlightAllUrl")
-			end,
+			command = "HighlightAllUrls",
 		})
 	end
 
