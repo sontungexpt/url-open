@@ -1,7 +1,6 @@
 ## Introduction
 
-This plugin enables you to effortlessly open the URL under the cursor in Neovim,
-bypassing the need for netrw, and instead utilizing the default browser of your system.
+This plugin enables you to effortlessly open the URL under the cursor in Neovim, bypassing the need for netrw, and instead utilizing the default browser of your system.
 It provides the convenience of automatically detecting and highlighting all URLs within the text content.
 
 **NOTE:** Since I am the linux user so i only test this plugin on linux, if you
@@ -99,13 +98,13 @@ You can easily add more patterns to open url under cursor by adding more pattern
 ```lua
 -- default values
 require("url_open").setup({
-    -- if true, only open url when cursor in the middle of url
-    -- if false, open next url found from cursor position it means you can open
-    -- url even when the cursor is in front of url or in the middle of url
-    open_app = "default",
     -- default will open url with default browser of your system or you can choose your browser like this
     -- open_app = "micorsoft-edge-stable",
     -- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
+    open_app = "default",
+    -- If true, only open the URL when the cursor is in the middle of the URL.
+    -- If false, open the next URL found from the cursor position,
+    -- which means you can open a URL even when the cursor is in front of the URL or in the middle of the URL.
     open_only_when_cursor_on_url = false,
     highlight_url = {
         all_urls = {
