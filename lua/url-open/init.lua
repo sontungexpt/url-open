@@ -3,11 +3,19 @@ local fn = vim.fn
 local levels = vim.log.levels
 local notify = vim.notify
 local schedule = vim.schedule
+local os_uname = vim.loop.os_uname().sysname
+local new_cmd = api.nvim_create_user_command
+local autocmd = api.nvim_create_autocmd
+local augroup = api.nvim_create_augroup
 
 local Plugin = {}
 
 local info = function(msg, opts)
 	schedule(function() notify(msg, levels.INFO, opts or { title = "Information" }) end)
+end
+
+local warn = function(msg, opts)
+	schedule(function() notify(msg, levels.WARN, opts or { title = "URL OPEN WARNING" }) end)
 end
 
 local error = function(msg, opts)
@@ -40,38 +48,54 @@ local DEEP_PATTERN =
 
 local PATTERNS = {
 	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"] = "", --- url http(s)
-	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
 	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
 		prefix = "https://www.npmjs.com/package/",
 		suffix = "",
 		file_patterns = { "package%.json" },
-		-- excluded_file_patterns = {},
-	}, --- npm package
+		extra_condition = function(pattern_found)
+			return pattern_found ~= "version" and pattern_found ~= "proxy"
+		end,
+	}, -- npm package
 	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
 		prefix = "https://github.com/",
 		suffix = "",
-		-- file_patterns = {},
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
-		-- extra_condition = function() return true end,
-	}, --- plugin name git
-	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --- brew formula
-	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", --- cask formula
+	}, -- plugin name git
+	['brew ["]([^%s]*)["]'] = {
+		prefix = "https://formulae.brew.sh/formula/",
+		suffix = "",
+	}, -- brew formula
+	['cask ["]([^%s]*)["]'] = {
+		prefix = "https://formulae.brew.sh/cask/",
+		suffix = "",
+	}, -- cask formula
+	["^%s*([%w_]+)%s*="] = {
+		prefix = "https://crates.io/crates/",
+		suffix = "",
+		file_patterns = { "Cargo%.toml" },
+		extra_condition = function(pattern_found)
+			return not vim.tbl_contains({
+				"name",
+				"version",
+				"edition",
+				"authors",
+				"description",
+				"license",
+				"repository",
+				"homepage",
+				"documentation",
+				"keywords",
+			}, pattern_found)
+		end,
+	}, -- cargo package
 }
 
 local call_cmd = function(command, msg)
 	local success, error_message = pcall(api.nvim_command, command)
 	if success then
-		if msg and msg.success then
-			info(msg.success, { title = "URL Handler" })
-		else
-			info("Success", { title = "URL Handler" })
-		end
+		info(msg and msg.success or "Success")
 	else
-		if msg and msg.error then
-			error(msg.error .. ": " .. error_message, { title = "URL Handler" })
-		else
-			error("Error: " .. error_message, { title = "URL Handler" })
-		end
+		error((msg and msg.error or "Error") .. ": " .. error_message)
 	end
 end
 
@@ -86,8 +110,13 @@ local check_file_patterns = function(file_patterns, is_excluded)
 	return false
 end
 
+local check_condition_pattern = function(pattern_found, condition)
+	if type(condition) == "function" then condition = condition(pattern_found) end
+	return type(condition) ~= "boolean" and true or condition
+end
+
 local find_first_url_matching_patterns = function(text, patterns, start_pos, found_url_smaller_pos)
-	found_url_smaller_pos = found_url_smaller_pos or string.len(text)
+	found_url_smaller_pos = found_url_smaller_pos or #text
 	start_pos = start_pos or 1
 	local start_found, end_found, url_found = nil, nil, nil
 
@@ -95,21 +124,16 @@ local find_first_url_matching_patterns = function(text, patterns, start_pos, fou
 		subs = subs or { prefix = "" }
 		if type(subs) == "string" then subs = { prefix = subs } end -- support old version
 
-		local extra_condition = subs.extra_condition
-		if extra_condition and type(extra_condition) == "function" then
-			extra_condition = extra_condition()
-		else
-			extra_condition = true
-		end
-
-		if type(extra_condition) ~= "boolean" then extra_condition = true end
 		if
 			not check_file_patterns(subs.excluded_file_patterns, true)
 			and check_file_patterns(subs.file_patterns)
-			and extra_condition
 		then
 			local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-			if url and found_url_smaller_pos > start_pos_result then
+			if
+				url
+				and found_url_smaller_pos > start_pos_result
+				and check_condition_pattern(url, subs.extra_condition)
+			then
 				found_url_smaller_pos = start_pos_result
 				url = (subs.prefix or "") .. url .. (subs.suffix or "")
 				start_found, end_found, url_found = start_pos_result, end_pos_result, url
@@ -119,7 +143,7 @@ local find_first_url_matching_patterns = function(text, patterns, start_pos, fou
 	return start_found, end_found, url_found
 end
 
-local find_first_url_in_text = function(user_opts, text, start_pos)
+local find_first_url_in_line = function(user_opts, text, start_pos)
 	local start_found, end_found, url_found = find_first_url_matching_patterns(text, PATTERNS, start_pos)
 
 	local extra_start_found, extra_end_found, extra_url_found =
@@ -141,15 +165,55 @@ local find_first_url_in_text = function(user_opts, text, start_pos)
 	return start_found, end_found, url_found
 end
 
+local open_url_with_app = function(apps, url)
+	for _, app in ipairs(apps) do
+		if fn.executable(app) == 1 then
+			local shell_safe_url = fn.shellescape(url)
+			local command = "silent! !" .. app .. " " .. shell_safe_url
+			call_cmd(command, {
+				success = "Opening " .. url .. " successfully.",
+				error = "Opening " .. url .. " failed.",
+			})
+			return
+		end
+	end
+	local error_message = "Cannot find any of the following applications to open the URL: "
+		.. table.concat(apps, ", ")
+		.. "on "
+		.. os_uname
+		.. ". Please install one of these applications or add your preferred app to the URL options."
+	error(error_message)
+end
+
+local system_open_url = function(user_opts, url)
+	if url then
+		local open_app = user_opts.open_app
+		if open_app == "default" or open_app == "" then
+			if os_uname == "Linux" then
+				open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open" }, url)
+			elseif vim.loop.os_uname().sysname == "Darwin" then
+				open_url_with_app({ "open" }, url)
+			elseif vim.loop.os_uname().sysname == "Windows" then
+				open_url_with_app({ "start" }, url)
+			else
+				error("Unknown operating system")
+			end
+		else
+			open_url_with_app({ open_app }, url)
+		end
+	else
+		error("No url found")
+	end
+end
+
 local open_url = function(user_opts)
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
-
 	local url_to_open = nil
 
 	-- get the first url in the line
-	local start_pos, end_pos, url = find_first_url_in_text(user_opts, line)
+	local start_pos, end_pos, url = find_first_url_in_line(user_opts, line)
 
 	while url do
 		if user_opts.open_only_when_cursor_on_url then
@@ -162,55 +226,10 @@ local open_url = function(user_opts)
 		end
 		if cursor_col < end_pos then break end
 		-- find the next url
-		start_pos, end_pos, url = find_first_url_in_text(user_opts, line, end_pos + 1)
+		start_pos, end_pos, url = find_first_url_in_line(user_opts, line, end_pos + 1)
 	end
 
-	if url_to_open then
-		local shell_safe_url = fn.shellescape(url_to_open)
-		local command = ""
-		if user_opts.open_app == "default" or user_opts.open_app == "" then
-			if vim.loop.os_uname().sysname == "Linux" then
-				if fn.executable("xdg-open") == 1 then
-					command = "silent! !xdg-open " .. shell_safe_url
-				elseif fn.executable("gnome-open") then
-					command = "silent! !gnome-open " .. shell_safe_url
-				else
-					error("Unknown command to open url on Linux", { title = "URL Handler" })
-					return
-				end
-			elseif vim.loop.os_uname().sysname == "Darwin" then
-				if fn.executable("open") == 1 then
-					command = "silent! !open " .. shell_safe_url
-				else
-					error("Unknown command to open url on MacOS", { title = "URL Handler" })
-					return
-				end
-			elseif vim.loop.os_uname().sysname == "Windows" then
-				if fn.executable("start") == 1 then
-					command = "silent! !start " .. shell_safe_url
-				else
-					error("Unknown command to open url on Windows", { title = "URL Handler" })
-					return
-				end
-			else
-				error("Unknown operating system.", { title = "URL Handler" })
-				return
-			end
-		else
-			if fn.executable(user_opts.open_app) == 1 then
-				command = "silent! !" .. user_opts.open_app .. " " .. shell_safe_url
-			else
-				error("Unknown application to open url", { title = "URL Handler" })
-				return
-			end
-		end
-		call_cmd(command, {
-			success = "Opening " .. url_to_open .. " successfully.",
-			error = "Opening " .. url_to_open .. " failed.",
-		})
-	else
-		error("No url found.", { title = "URL Handler" })
-	end
+	system_open_url(user_opts, url_to_open)
 end
 
 local change_color_highlight = function(opts, group_name)
@@ -225,47 +244,64 @@ local delete_url_effect = function(group_name)
 	end
 end
 
---- Add syntax matching rules for highlighting URLs/URIs.
 local set_url_effect = function()
-	delete_url_effect("HighlightAllUrl")
-	fn.matchadd("HighlightAllUrl", DEEP_PATTERN, 15)
+	delete_url_effect("URLOpenHighlightAll")
+	fn.matchadd("URLOpenHighlightAll", DEEP_PATTERN, 15)
 end
 
 local init_command = function(user_opts)
-	api.nvim_create_user_command("OpenUrlUnderCursor", function() open_url(user_opts) end, { nargs = 0 })
-	api.nvim_create_user_command("HighlightAllUrls", function()
-		set_url_effect()
-		change_color_highlight(user_opts.highlight_url.all_urls, "HighlightAllUrl")
+	new_cmd("OpenUrlUnderCursor", function()
+		warn("OpenUrlUnderCursor is deprecated, please use URLOpenUnderCursor instead.")
+		open_url(user_opts)
 	end, { nargs = 0 })
+
+	new_cmd("URLOpenUnderCursor", function() open_url(user_opts) end, { nargs = 0 })
+
+	new_cmd("URLOpenHighlightAll", function()
+		set_url_effect()
+		change_color_highlight(user_opts.highlight_url.all_urls, "URLOpenHighlightAll")
+	end, { nargs = 0 })
+
+	new_cmd(
+		"URLOpenHighlightAllClear",
+		function() delete_url_effect("URLOpenHighlightAll") end,
+		{ nargs = 0 }
+	)
 end
 
 local function highlight_cursor_url(user_opts)
-	delete_url_effect("HighlightCursorUrl")
+	delete_url_effect("URLOpenHighlightCursor")
 
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_row = cursor_pos[1]
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
 
-	local start_pos, end_pos, url = find_first_url_in_text(user_opts, line)
+	local start_pos, end_pos, url = find_first_url_in_line(user_opts, line)
 
 	while url do
 		-- clear the other highlight url to make sure only one url is highlighted
-		delete_url_effect("HighlightCursorUrl")
+		delete_url_effect("URLOpenHighlightCursor")
 		if user_opts.open_only_when_cursor_on_url then
 			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
-				fn.matchaddpos("HighlightCursorUrl", { { cursor_row, start_pos, end_pos - start_pos + 1 } }, 20)
+				fn.matchaddpos(
+					"URLOpenHighlightCursor",
+					{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
+					20
+				)
 				break
 			end
 		else
-			fn.matchaddpos("HighlightCursorUrl", { { cursor_row, start_pos, end_pos - start_pos + 1 } }, 20)
+			fn.matchaddpos(
+				"URLOpenHighlightCursor",
+				{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
+				20
+			)
 		end
 
-		--if cursor_col >= start_pos and cursor_col < end_pos then break end
-		-- end pos is the next char after the url
 		if cursor_col < end_pos then break end
-		-- find the next url
-		start_pos, end_pos, url = find_first_url_in_text(user_opts, line, end_pos + 1)
+
+		start_pos, end_pos, url = find_first_url_in_line(user_opts, line, end_pos + 1)
 	end
 end
 
@@ -273,22 +309,22 @@ local init_autocmd = function(user_opts)
 	local highlight_url = user_opts.highlight_url
 
 	if highlight_url.all_urls.enabled then
-		api.nvim_command("HighlightAllUrls") -- Highlight all urls on startup
+		api.nvim_command("URLOpenHighlightAll") -- Highlight all urls on startup
 
-		api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+		autocmd({ "BufEnter", "WinEnter" }, {
 			desc = "URL Highlighting",
-			group = api.nvim_create_augroup("HighlightAllUrl", { clear = true }),
-			command = "HighlightAllUrls",
+			group = augroup("URLOpenHighlightAll", { clear = true }),
+			command = "URLOpenHighlightAll",
 		})
 	end
 
 	if highlight_url.cursor_move.enabled then
-		api.nvim_create_autocmd({ "CursorMoved" }, {
+		autocmd({ "CursorMoved" }, {
 			desc = "URL Highlighting CursorMoved",
-			group = api.nvim_create_augroup("HighlightCursorUrl", { clear = true }),
+			group = augroup("URLOpenHighlightCursor", { clear = true }),
 			callback = function()
 				highlight_cursor_url(user_opts)
-				change_color_highlight(highlight_url.cursor_move, "HighlightCursorUrl")
+				change_color_highlight(highlight_url.cursor_move, "URLOpenHighlightCursor")
 			end,
 		})
 	end
