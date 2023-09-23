@@ -59,26 +59,24 @@ M.find_first_url_matching_patterns = function(text, patterns, start_pos, found_u
 	found_url_smaller_pos = found_url_smaller_pos or #text
 	local start_found, end_found, url_found = nil, nil, nil
 
-	for pattern, subs in pairs(patterns) do
-		subs = subs or { prefix = "" }
-		if type(subs) == "string" then subs = { prefix = subs } end -- support old version
-
+	for _, cond in ipairs(patterns) do
 		if
-			not M.check_file_patterns(subs.excluded_file_patterns, true)
-			and M.check_file_patterns(subs.file_patterns)
+			not M.check_file_patterns(cond.excluded_file_patterns, true)
+			and M.check_file_patterns(cond.file_patterns)
 		then
-			local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
+			local start_pos_result, end_pos_result, url = text:find(cond.pattern, start_pos)
 			if
 				url
 				and found_url_smaller_pos > start_pos_result
-				and M.check_condition_pattern(url, subs.extra_condition)
+				and M.check_condition_pattern(url, cond.extra_condition)
 			then
 				found_url_smaller_pos = start_pos_result
-				url_found = (subs.prefix or "") .. url .. (subs.suffix or "")
+				url_found = (cond.prefix or "") .. url .. (cond.suffix or "")
 				start_found, end_found = start_pos_result, end_pos_result
 			end
 		end
 	end
+
 	return start_found, end_found, url_found
 end
 

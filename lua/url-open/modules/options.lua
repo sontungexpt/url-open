@@ -69,10 +69,9 @@ M.validate_opts = function(opts)
 		end
 
 		if opts.extra_patterns then
-			for pattern, sub in pairs(opts.extra_patterns) do
+			for _, cond in ipairs(opts.extra_patterns) do
 				validate {
-					pattern = { pattern, "string" },
-					sub = { sub, { "table", "string" } },
+					pattern = { cond.pattern, "string" },
 				}
 			end
 		end
