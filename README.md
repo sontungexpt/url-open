@@ -70,7 +70,7 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 },
 ```
 
-- NOTE: If you want to use minimal source with no commnets, no validate configs,
+- NOTE: If you want to use minimal source with no commnets, no validate configs, no documents,
   you can use branch `mini` instead of `main` branch. Make sure you know that your config is valid
 
 ```lua
