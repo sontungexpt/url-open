@@ -5,15 +5,21 @@ local validate = vim.validate
 
 --- Default options
 --- @table DEFAULT_OPTIONS
---  @field open_app string : The app to open the url with
---  @field open_only_when_cursor_on_url boolean : Open url only when cursor on url
---  @field highlight_url.enabled boolean : Enable highlight url
---  @field highlight_url.fg string : Change foreground color of the url highlight
---  @field highlight_url.bg string : Change background color of the url highlight
---  @field highlight_url.underline boolean : Change underline of the url highlight
---  @field highlight_url.cursor_only boolean : Highlight only when cursor on url or highlight all urls
---  @field deep_pattern boolean : Enable deep pattern
---  @field extra_patterns table : Extra patterns to match
+--- @tfield string open_app : The app to open the url with
+--- @tfield boolean open_only_when_cursor_on_url : Open url only when cursor on url
+--- @tfield table highlight_url : Highlight url options
+--- @tfield table highlight_url.all_urls : Highlight all urls options
+--- @tfield table highlight_url.cursor_move : Highlight url when cursor move options
+--- @tfield boolean highlight_url.all_urls.enabled : Enable highlight all_urls options
+--- @tfield string highlight_url.all_urls.fg : Highlight foreground color
+--- @tfield string highlight_url.all_urls.bg : Highlight background color
+--- @tfield boolean highlight_url.all_urls.underline : enable underline
+--- @tfield boolean highlight_url.cursor_move.enabled : Enable highlight cursor_move options
+--- @tfield string highlight_url.cursor_move.fg : Highlight foreground color
+--- @tfield string highlight_url.cursor_move.bg : Highlight background color
+--- @tfield boolean highlight_url.cursor_move.underline : enable underline
+--- @tfield boolean deep_pattern : Enable deep pattern
+--- @tfield table extra_patterns : A list of extra patterns to open url
 M.DEFAULT_OPTIONS = {
 	open_app = "default",
 	open_only_when_cursor_on_url = false,
