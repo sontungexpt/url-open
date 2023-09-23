@@ -15,7 +15,7 @@ local logger = require("url-open.modules.logger")
 M.setup = function(user_opts)
 	new_cmd("OpenUrlUnderCursor", function()
 		handlers.open_url(user_opts)
-		logger.warning("OpenUrlUnderCursor is deprecated, please use URLOpenUnderCursor instead.")
+		logger.warn("OpenUrlUnderCursor is deprecated, please use URLOpenUnderCursor instead.")
 	end, { nargs = 0 })
 
 	new_cmd("URLOpenUnderCursor", function() handlers.open_url(user_opts) end, { nargs = 0 })
