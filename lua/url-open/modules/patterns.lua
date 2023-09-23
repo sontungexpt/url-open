@@ -35,13 +35,16 @@ M.DEEP_PATTERN =
 --
 -- Cask Formula: ['cask ["]([^%s]*)["]']
 --
+-- Cargo Package: ["^%s*([%w_]+)%s*="]
 M.PATTERNS = {
 	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"] = "", --- url http(s)
-	-- ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/", --- npm package
 	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
 		prefix = "https://www.npmjs.com/package/",
 		suffix = "",
 		file_patterns = { "package%.json" },
+		extra_condition = function(pattern_found)
+			return pattern_found ~= "version" and pattern_found ~= "proxy"
+		end,
 		-- excluded_file_patterns = {},
 	}, --- npm package
 	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
@@ -49,10 +52,28 @@ M.PATTERNS = {
 		suffix = "",
 		-- file_patterns = {},
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
-		-- extra_condition = function() return true end,
 	}, --- plugin name git
 	['brew ["]([^%s]*)["]'] = "https://formulae.brew.sh/formula/", --- brew formula
 	['cask ["]([^%s]*)["]'] = "https://formulae.brew.sh/cask/", --- cask formula
+	["^%s*([%w_]+)%s*="] = {
+		prefix = "https://crates.io/crates/",
+		suffix = "",
+		file_patterns = { "Cargo%.toml" },
+		extra_condition = function(pattern_found)
+			return not vim.tbl_contains({
+				"name",
+				"version",
+				"edition",
+				"authors",
+				"description",
+				"license",
+				"repository",
+				"homepage",
+				"documentation",
+				"keywords",
+			}, pattern_found)
+		end,
+	}, --- cargo package
 }
 
 return M

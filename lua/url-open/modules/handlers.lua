@@ -37,6 +37,19 @@ M.check_file_patterns = function(file_patterns, is_excluded)
 	return false
 end
 
+--- Check if the pattern found matches the condition
+--- @tparam string pattern_found : The url to check
+--- @tparam function|boolean condition : The condition to check (function(pattern_found))
+--- @treturn boolean : True if the pattern found matches the condition, otherwise false
+--- @see url-open.modules.patterns
+--- @see url-open.modules.handlers.find_first_url_matching_patterns
+--- @see url-open.modules.handlers.find_first_url_in_line
+M.check_condition_pattern = function(pattern_found, condition)
+	-- type(nil) == nil
+	if type(condition) == "function" then condition = condition(pattern_found) end
+	return type(condition) ~= "boolean" and true or condition
+end
+
 --- Check if the text contains any of the patterns
 --- @tparam string text  : Text to search for patterns
 --- @tparam table patterns : Patterns to search for urls in the text
@@ -44,29 +57,24 @@ end
 --- @tparam number found_url_smaller_pos : The position of the found url must be smaller than this number (optional) (default: string.len(text))
 --- @see url-open.modules.patterns
 M.find_first_url_matching_patterns = function(text, patterns, start_pos, found_url_smaller_pos)
-	found_url_smaller_pos = found_url_smaller_pos or string.len(text)
 	start_pos = start_pos or 1
+	found_url_smaller_pos = found_url_smaller_pos or string.len(text)
 	local start_found, end_found, url_found = nil, nil, nil
 
 	for pattern, subs in pairs(patterns) do
 		subs = subs or { prefix = "" }
 		if type(subs) == "string" then subs = { prefix = subs } end -- support old version
 
-		local extra_condition = subs.extra_condition
-		if extra_condition and type(extra_condition) == "function" then
-			extra_condition = extra_condition()
-		else
-			extra_condition = true
-		end
-
-		if type(extra_condition) ~= "boolean" then extra_condition = true end
 		if
 			not M.check_file_patterns(subs.excluded_file_patterns, true)
 			and M.check_file_patterns(subs.file_patterns)
-			and extra_condition
 		then
 			local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
-			if url and found_url_smaller_pos > start_pos_result then
+			if
+				url
+				and found_url_smaller_pos > start_pos_result
+				and M.check_condition_pattern(url, subs.extra_condition)
+			then
 				found_url_smaller_pos = start_pos_result
 				url = (subs.prefix or "") .. url .. (subs.suffix or "")
 				start_found, end_found, url_found = start_pos_result, end_pos_result, url
@@ -82,7 +90,7 @@ end
 --- @tparam number start_pos : Start position to search from (optional) (default: 1)
 --- @treturn number start_pos, number end_pos, string url: Start position, end position, and url of the first url found (all nil if not found)
 --- @see url-open.modules.patterns
-M.find_first_url_in_text = function(user_opts, text, start_pos)
+M.find_first_url_in_line = function(user_opts, text, start_pos)
 	-- check default patterns first
 	local start_found, end_found, url_found =
 		M.find_first_url_matching_patterns(text, patterns_module.PATTERNS, start_pos)
@@ -148,7 +156,7 @@ M.open_url = function(user_opts)
 	local url_to_open = nil
 
 	-- get the first url in the line
-	local start_pos, end_pos, url = M.find_first_url_in_text(user_opts, line)
+	local start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line)
 
 	while url do
 		-- if the url under cursor, then break
@@ -166,7 +174,7 @@ M.open_url = function(user_opts)
 		if cursor_col < end_pos then break end
 
 		-- find the next url
-		start_pos, end_pos, url = M.find_first_url_in_text(user_opts, line, end_pos + 1)
+		start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line, end_pos + 1)
 	end
 
 	if url_to_open then
@@ -215,7 +223,7 @@ M.highlight_cursor_url = function(user_opts)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
 
-	local start_pos, end_pos, url = M.find_first_url_in_text(user_opts, line)
+	local start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line)
 
 	while url do
 		-- clear the other highlight url to make sure only one url is highlighted
@@ -241,7 +249,7 @@ M.highlight_cursor_url = function(user_opts)
 		-- end pos is the next char after the url
 		if cursor_col < end_pos then break end
 		-- find the next url
-		start_pos, end_pos, url = M.find_first_url_in_text(user_opts, line, end_pos + 1)
+		start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line, end_pos + 1)
 	end
 end
 
