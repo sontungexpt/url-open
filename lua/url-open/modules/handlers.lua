@@ -56,7 +56,7 @@ end
 --- @see url-open.modules.patterns
 M.find_first_url_matching_patterns = function(text, patterns, start_pos, found_url_smaller_pos)
 	start_pos = start_pos or 1
-	found_url_smaller_pos = found_url_smaller_pos or string.len(text)
+	found_url_smaller_pos = found_url_smaller_pos or #text
 	local start_found, end_found, url_found = nil, nil, nil
 
 	for pattern, subs in pairs(patterns) do
@@ -74,8 +74,8 @@ M.find_first_url_matching_patterns = function(text, patterns, start_pos, found_u
 				and M.check_condition_pattern(url, subs.extra_condition)
 			then
 				found_url_smaller_pos = start_pos_result
-				url = (subs.prefix or "") .. url .. (subs.suffix or "")
-				start_found, end_found, url_found = start_pos_result, end_pos_result, url
+				url_found = (subs.prefix or "") .. url .. (subs.suffix or "")
+				start_found, end_found = start_pos_result, end_pos_result
 			end
 		end
 	end
@@ -107,7 +107,7 @@ M.find_first_url_in_line = function(user_opts, text, start_pos)
 		local results = fn.matchstrpos(text, patterns_module.DEEP_PATTERN, start_pos)
 		-- result[1] is url, result[2] is start_pos, result[3] is end_pos
 		-- >= to make deep_pattern has higher priority than default patterns
-		if results[1] ~= "" and (start_found or string.len(text)) >= results[2] + 1 then
+		if results[1] ~= "" and (start_found or #text) >= results[2] + 1 then
 			start_found, end_found, url_found = results[2] + 1, results[3], results[1]
 		end
 	end
