@@ -2,129 +2,81 @@
 --
 local M = {}
 
---- Deep Pattern to match urls from text. This pattern will find urls in the following formats:
---  http://example.com
---  https://www.example.com
---  ftp://ftp.example.com
---  file:///path/to/file.txt
---  ssh://user@hostname
---  git://github.com/user/repo
---  http://example.com/path?param=value
---  https://www.example.com/another/path#section
---  http://example.com:8080
---  https://www.example.com:8443
---  ftp://ftp.example.com:2121
+--- Deep Pattern to match URLs from text. This pattern will find URLs in various formats.
+--- Supported URL formats:
+--
+-- - http://example.com
+-- - https://www.example.com
+-- - ftp://ftp.example.com
+-- - file:///path/to/file.txt
+-- - ssh://user@hostname
+-- - git://github.com/user/repo
+-- - http://example.com/path?param=value
+-- - https://www.example.com/another/path#section
+-- - http://example.com:8080
+-- - https://www.example.com:8443
+-- - ftp://ftp.example.com:2121
 M.DEEP_PATTERN =
 	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%<>_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%<>_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
 ---
--- Default Patterns to match urls.
---
--- Http(s) URL pattern
--- Matches URLs starting with "http://" or "https://"
--- Example: "http://example.com", "https://www.example.com"
--- Pattern: "(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"
--- Prefix: ""
--- Suffix: ""
--- File_patterns: All files
--- Extra_condition: None
--- Excluded_file_patterns: None
--- Note: This pattern is used to match urls in all files
---
---
--- Npm Package pattern
--- Matches npm package names
--- Example: "react", "react-dom"
--- Pattern: '["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'
--- Prefix: "https://www.npmjs.com/package/"
--- Suffix: ""
--- File_patterns: "package%.json"
--- Extra_condition: pattern_found ~= "version" and pattern_found ~= "proxy"
--- Excluded_file_patterns: None
--- Note: This pattern is used to match npm packages in package.json files
---
--- Git Plugin pattern
--- Matches git plugin names
--- Example: "airblade/vim-gitgutter", "tpope/vim-fugitive"
--- Pattern: "[\"']([^%s~/]*/[^%s~/]*)[\"']"
--- Prefix: "https://github.com/"
--- Suffix: ""
--- File_patterns: All files except package.json and package-lock.json
--- Extra_condition: None
--- Excluded_file_patterns: "package%.json", "package%-lock%.json"
--- Note: This pattern is used to match git plugins in all files except package.json and package-lock.json
---
---
--- Brew Formula pattern
--- Matches brew formula names
--- Example: "bat", "exa"
--- Pattern: 'brew ["]([^%s]*)["]'
--- Prefix: "https://formulae.brew.sh/formula/"
--- Suffix: ""
--- File_patterns: All files
--- Extra_condition: None
--- Excluded_file_patterns: None
--- Note: This pattern is used to match brew formulas in all files
---
--- Cask Formula pattern
--- Matches cask formula names
--- Example: "firefox", "google-chrome"
--- Pattern: 'cask ["]([^%s]*)["]'
--- Prefix: "https://formulae.brew.sh/cask/"
--- Suffix: ""
--- File_patterns: All files
--- Extra_condition: None
--- Excluded_file_patterns: None
--- Note: This pattern is used to match cask formulas in all files
---
--- Cargo Package pattern
--- Matches cargo package names
--- Example: "serde", "serde_json"
--- Pattern: "^%s*([%w_]+)%s*="
--- Prefix: "https://crates.io/crates/"
--- Suffix: ""
--- File_patterns: "Cargo%.toml"
--- Extra_condition: not vim.tbl_contains({
---   "name",
---   "version",
---   "edition",
---   "authors",
---   "description",
---   "license",
---   "repository",
---   "homepage",
---   "documentation",
---   "keywords",
---   }, pattern_found)
--- Excluded_file_patterns: None
--- Note: This pattern is used to match cargo packages in Cargo.toml files
+--- Default patterns to match urls
+--- @table PATTERNS
+--- @tfield string pattern : Pattern to match urls (required)
+--- @tfield string|nil prefix : Prefix to add to the url
+--- @tfield string|nil suffix : Suffix to add to the url
+--- @tfield table|string|nil file_patterns : File patterns to match against
+--- @tfield table|string|nil excluded_file_patterns : File patterns to exclude
+--- @tfield function(pattern_found)|boolean|nil extra_condition : A callback function will be called with the pattern found as argument. If the function returns false, the pattern will be ignored. If the function returns true, the pattern will be used.
 M.PATTERNS = {
-	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"] = "", --- url http(s)
-	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+	{
+		pattern = "(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)",
+		prefix = "",
+		suffix = "",
+		file_patterns = nil,
+		excluded_file_patterns = nil,
+		extra_condition = nil,
+	},
+	{
+		pattern = '["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"',
 		prefix = "https://www.npmjs.com/package/",
 		suffix = "",
 		file_patterns = { "package%.json" },
+		excluded_file_patterns = nil,
 		extra_condition = function(pattern_found)
-			return pattern_found ~= "version" and pattern_found ~= "proxy"
+			return not vim.tbl_contains({ "version", "proxy" }, pattern_found)
 		end,
-	}, -- npm package
-	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
+	},
+	{
+		pattern = "[\"']([^%s~/]*/[^%s~/]*)[\"']",
 		prefix = "https://github.com/",
 		suffix = "",
+		file_patterns = nil,
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
-	}, -- plugin name git
-	['brew ["]([^%s]*)["]'] = {
+		extra_condition = nil,
+	},
+	{
+		pattern = 'brew ["]([^%s]*)["]',
 		prefix = "https://formulae.brew.sh/formula/",
 		suffix = "",
-	}, -- brew formula
-	['cask ["]([^%s]*)["]'] = {
+		file_patterns = nil,
+		excluded_file_patterns = nil,
+		extra_condition = nil,
+	},
+	{
+		pattern = 'cask ["]([^%s]*)["]',
 		prefix = "https://formulae.brew.sh/cask/",
 		suffix = "",
-	}, -- cask formula
-	["^%s*([%w_]+)%s*="] = {
+		file_patterns = nil,
+		excluded_file_patterns = nil,
+		extra_condition = nil,
+	},
+	{
+		pattern = "^%s*([%w_]+)%s*=",
 		prefix = "https://crates.io/crates/",
 		suffix = "",
 		file_patterns = { "Cargo%.toml" },
+		excluded_file_patterns = nil,
 		extra_condition = function(pattern_found)
 			return not vim.tbl_contains({
 				"name",
@@ -139,7 +91,7 @@ M.PATTERNS = {
 				"keywords",
 			}, pattern_found)
 		end,
-	}, -- cargo package
+	},
 }
 
 return M
