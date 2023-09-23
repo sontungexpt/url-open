@@ -4,17 +4,16 @@ local api = vim.api
 local autocmd = api.nvim_create_autocmd
 local augroup = api.nvim_create_augroup
 
-local handlers = require("url-open.modules.handlers")
+local highlight = require("url-open.modules.highlight")
 
 local M = {}
 
 --- Setup the autocmds
 --- @tparam table user_opts : The user options
---- @treturn nil
---- @see url-open.setup
---- @see url-open.modules.handlers.highlight_cursor_url
---- @see url-open.modules.handlers.set_url_effect
-
+--- @see url-open.modules.commands
+--- @see url-open.modules.highlight.highlight_cursor_url
+--- @see url-open.modules.highlight.change_color_highlight
+--- @usage require("url-open.modules.autocmd").setup(opts)
 M.setup = function(user_opts)
 	local highlight_url = user_opts.highlight_url
 
@@ -33,8 +32,8 @@ M.setup = function(user_opts)
 			desc = "Highlight the url under the cursor",
 			group = augroup("URLOpenHighlightCursor", { clear = true }),
 			callback = function()
-				handlers.highlight_cursor_url(user_opts)
-				handlers.change_color_highlight(highlight_url.cursor_move, "URLOpenHighlightCursor")
+				highlight.highlight_cursor_url(user_opts)
+				highlight.change_color_highlight(highlight_url.cursor_move, "URLOpenHighlightCursor")
 			end,
 		})
 	end

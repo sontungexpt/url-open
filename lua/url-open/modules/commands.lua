@@ -5,6 +5,7 @@ local new_cmd = vim.api.nvim_create_user_command
 
 local handlers = require("url-open.modules.handlers")
 local logger = require("url-open.modules.logger")
+local highlight = require("url-open.modules.highlight")
 
 --- Setup the OpenUrlUnderCursor command and URLOpenHighlightAlls command.
 --- @tparam table user_opts : User options.
@@ -21,13 +22,13 @@ M.setup = function(user_opts)
 	new_cmd("URLOpenUnderCursor", function() handlers.open_url(user_opts) end, { nargs = 0 })
 
 	new_cmd("URLOpenHighlightAll", function()
-		handlers.set_url_effect()
-		handlers.change_color_highlight(user_opts.highlight_url.all_urls, "URLOpenHighlightAll")
+		highlight.set_url_effect()
+		highlight.change_color_highlight(user_opts.highlight_url.all_urls, "URLOpenHighlightAll")
 	end, { nargs = 0 })
 
 	new_cmd(
 		"URLOpenHighlightAllClear",
-		function() handlers.delete_url_effect("URLOpenHighlightAll") end,
+		function() highlight.delete_url_effect("URLOpenHighlightAll") end,
 		{ nargs = 0 }
 	)
 end

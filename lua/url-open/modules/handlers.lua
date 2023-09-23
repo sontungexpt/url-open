@@ -42,15 +42,13 @@ end
 --- @tparam function|boolean condition : The condition to check (function(pattern_found))
 --- @treturn boolean : True if the pattern found matches the condition, otherwise false
 --- @see url-open.modules.patterns
---- @see url-open.modules.handlers.find_first_url_matching_patterns
---- @see url-open.modules.handlers.find_first_url_in_line
 M.check_condition_pattern = function(pattern_found, condition)
 	-- type(nil) == nil
 	if type(condition) == "function" then condition = condition(pattern_found) end
 	return type(condition) ~= "boolean" and true or condition
 end
 
---- Check if the text contains any of the patterns
+--- Find the first url in the text that matches any of the patterns
 --- @tparam string text  : Text to search for patterns
 --- @tparam table patterns : Patterns to search for urls in the text
 --- @tparam number start_pos : Start position to search from (optional) (default: 0)
@@ -84,21 +82,19 @@ M.find_first_url_matching_patterns = function(text, patterns, start_pos, found_u
 	return start_found, end_found, url_found
 end
 
---- Find the first url in the text
+--- Find the first url in the line
 --- @tparam table user_opts : User options
 --- @tparam string text : Text to search for urls
 --- @tparam number start_pos : Start position to search from (optional) (default: 1)
 --- @treturn number start_pos, number end_pos, string url: Start position, end position, and url of the first url found (all nil if not found)
 --- @see url-open.modules.patterns
+--- @see url-open.modules.options
+--- @see url-open.modules.handlers.find_first_url_matching_patterns
 M.find_first_url_in_line = function(user_opts, text, start_pos)
 	-- check default patterns first
 	local start_found, end_found, url_found =
 		M.find_first_url_matching_patterns(text, patterns_module.PATTERNS, start_pos)
 
-	-- check extra patterns of user if found nothing in default patterns
-	-- if find a url in extra patterns and
-	-- its start position is smaller than the start position of the url found in default patterns,
-	-- then use it otherwise use the url found in default patterns
 	local extra_start_found, extra_end_found, extra_url_found =
 		M.find_first_url_matching_patterns(text, user_opts.extra_patterns, start_pos, start_found)
 
@@ -122,8 +118,6 @@ end
 --- Open the url with the specified app
 --- @tparam table apps : The table of apps to open the url
 --- @tparam string url : The url to open
---- @see url-open.modules.patterns
---- @see url-open.modules.handlers.open_url
 --- @see url-open.modules.handlers.call_cmd
 M.open_url_with_app = function(apps, url)
 	for _, app in ipairs(apps) do
@@ -145,14 +139,41 @@ M.open_url_with_app = function(apps, url)
 	logger.error(error_message)
 end
 
+--- Open the url relying on the operating system
+--- @tparam table user_opts : User options
+--- @tparam string url : The url to open
+--- @see url-open.modules.handlers.open_url_with_app
+M.system_open_url = function(user_opts, url)
+	if url then
+		local open_app = user_opts.open_app
+		if open_app == "default" or open_app == "" then
+			if os_uname == "Linux" then
+				M.open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open" }, url)
+			elseif vim.loop.os_uname().sysname == "Darwin" then
+				M.open_url_with_app({ "open" }, url)
+			elseif vim.loop.os_uname().sysname == "Windows" then
+				M.open_url_with_app({ "start" }, url)
+			else
+				logger.error("Unknown operating system")
+			end
+		else
+			M.open_url_with_app({ open_app }, url)
+		end
+	else
+		logger.error("No url found")
+	end
+end
+
 --- Open the url under the cursor
 --- If there is only one url in the line, then open it anywhere in the line.
 --- @tparam table user_opts : User options
+--- @see url-open.modules.options
+--- @see url-open.modules.handlers.find_first_url_in_line
+--- @see url-open.modules.handlers.system_open_url
 M.open_url = function(user_opts)
 	local cursor_pos = api.nvim_win_get_cursor(0)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
-
 	local url_to_open = nil
 
 	-- get the first url in the line
@@ -169,103 +190,12 @@ M.open_url = function(user_opts)
 			url_to_open = url
 		end
 
-		--if cursor_col >= start_pos and cursor_col < end_pos then break end
-		-- end pos is the next char after the url
-		if cursor_col < end_pos then break end
-
-		-- find the next url
-		start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line, end_pos + 1)
-	end
-
-	if url_to_open then
-		local open_app = user_opts.open_app
-		if open_app == "default" or open_app == "" then
-			if os_uname == "Linux" then
-				M.open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open" }, url_to_open)
-			elseif vim.loop.os_uname().sysname == "Darwin" then
-				M.open_url_with_app({ "open" }, url_to_open)
-			elseif vim.loop.os_uname().sysname == "Windows" then
-				M.open_url_with_app({ "start" }, url_to_open)
-			else
-				logger.error("Unknown operating system")
-			end
-		else
-			M.open_url_with_app({ open_app }, url_to_open)
-		end
-	else
-		logger.error("No url found.")
-	end
-end
-
---- Delete the syntax matching rules for URLs/URIs if set.
-M.delete_url_effect = function(group_name)
-	for _, match in ipairs(fn.getmatches()) do
-		if match.group == group_name then fn.matchdelete(match.id) end
-	end
-end
-
---- Add syntax matching rules for highlighting URLs/URIs.
---- @see url-open.modules.patterns
-M.set_url_effect = function(user_opts)
-	M.delete_url_effect("URLOpenHighlightAll")
-	fn.matchadd("URLOpenHighlightAll", patterns_module.DEEP_PATTERN, 15)
-end
-
---- Highlight the url under the cursor
---- @tparam table user_opts : User options
---- @see url-open.modules.patterns
-M.highlight_cursor_url = function(user_opts)
-	-- clear old highlight when moving cursor
-	M.delete_url_effect("URLOpenHighlightCursor")
-
-	local cursor_pos = api.nvim_win_get_cursor(0)
-	local cursor_row = cursor_pos[1]
-	local cursor_col = cursor_pos[2]
-	local line = api.nvim_get_current_line()
-
-	local start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line)
-
-	while url do
-		-- clear the other highlight url to make sure only one url is highlighted
-		M.delete_url_effect("URLOpenHighlightCursor")
-		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
-				fn.matchaddpos(
-					"URLOpenHighlightCursor",
-					{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
-					20
-				)
-				break
-			end
-		else
-			fn.matchaddpos(
-				"URLOpenHighlightCursor",
-				{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
-				20
-			)
-		end
-
-		--if cursor_col >= start_pos and cursor_col < end_pos then break end
-		-- end pos is the next char after the url
 		if cursor_col < end_pos then break end
 		-- find the next url
 		start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line, end_pos + 1)
 	end
-end
 
---- Change the color of the highlight
---- @tparam table opts : The user options
---- @tparam string group_name : The name of the highlight group
---- @treturn nil
---- @see url-open.modules.handlers.highlight_cursor_url
---- @see url-open.modules.handlers.set_url_effect
---- @see url-open.modules.autocmd.setup
---- @see url-open.setup
-M.change_color_highlight = function(opts, group_name)
-	opts.enabled = nil
-	if opts.fg and opts.fg == "text" then opts.fg = nil end
-
-	api.nvim_set_hl(0, group_name, opts)
+	M.system_open_url(user_opts, url_to_open)
 end
 
 return M

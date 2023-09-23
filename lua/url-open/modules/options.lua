@@ -114,8 +114,8 @@ end
 --- Apply user options
 --- @tparam table user_opts : User options
 --- @return table: Merged options
---- @see DEFAULT_OPTIONS
 --- @see validate_opts
+--- @see DEFAULT_OPTIONS
 M.apply_user_options = function(user_opts)
 	user_opts = M.validate_opts(user_opts)
 	return vim.tbl_deep_extend("force", M.DEFAULT_OPTIONS, user_opts or {})
