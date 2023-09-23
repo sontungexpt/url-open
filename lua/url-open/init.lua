@@ -47,32 +47,54 @@ local DEEP_PATTERN =
 	"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%<>_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%<>_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*\\})\\})+"
 
 local PATTERNS = {
-	["(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)"] = "", --- url http(s)
-	['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
+	{
+		pattern = "(https?://[%w-_%.]+%.%w[%w-_%.%%%?%.:/+=&%%[%]#<>]*)",
+		prefix = "",
+		suffix = "",
+		file_patterns = nil,
+		excluded_file_patterns = nil,
+		extra_condition = nil,
+	},
+	{
+		pattern = '["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"',
 		prefix = "https://www.npmjs.com/package/",
 		suffix = "",
 		file_patterns = { "package%.json" },
+		excluded_file_patterns = nil,
 		extra_condition = function(pattern_found)
-			return pattern_found ~= "version" and pattern_found ~= "proxy"
+			return not vim.tbl_contains({ "version", "proxy" }, pattern_found)
 		end,
-	}, -- npm package
-	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
+	},
+	{
+		pattern = "[\"']([^%s~/]*/[^%s~/]*)[\"']",
 		prefix = "https://github.com/",
 		suffix = "",
+		file_patterns = nil,
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
-	}, -- plugin name git
-	['brew ["]([^%s]*)["]'] = {
+		extra_condition = nil,
+	},
+	{
+		pattern = 'brew ["]([^%s]*)["]',
 		prefix = "https://formulae.brew.sh/formula/",
 		suffix = "",
-	}, -- brew formula
-	['cask ["]([^%s]*)["]'] = {
+		file_patterns = nil,
+		excluded_file_patterns = nil,
+		extra_condition = nil,
+	},
+	{
+		pattern = 'cask ["]([^%s]*)["]',
 		prefix = "https://formulae.brew.sh/cask/",
 		suffix = "",
-	}, -- cask formula
-	["^%s*([%w_]+)%s*="] = {
+		file_patterns = nil,
+		excluded_file_patterns = nil,
+		extra_condition = nil,
+	},
+	{
+		pattern = "^%s*([%w_]+)%s*=",
 		prefix = "https://crates.io/crates/",
 		suffix = "",
 		file_patterns = { "Cargo%.toml" },
+		excluded_file_patterns = nil,
 		extra_condition = function(pattern_found)
 			return not vim.tbl_contains({
 				"name",
@@ -87,7 +109,7 @@ local PATTERNS = {
 				"keywords",
 			}, pattern_found)
 		end,
-	}, -- cargo package
+	},
 }
 
 local call_cmd = function(command, msg)
@@ -120,26 +142,24 @@ local find_first_url_matching_patterns = function(text, patterns, start_pos, fou
 	start_pos = start_pos or 1
 	local start_found, end_found, url_found = nil, nil, nil
 
-	for pattern, subs in pairs(patterns) do
-		subs = subs or { prefix = "" }
-		if type(subs) == "string" then subs = { prefix = subs } end -- support old version
-
+	for _, cond in ipairs(patterns) do
 		if
-			not check_file_patterns(subs.excluded_file_patterns, true)
-			and check_file_patterns(subs.file_patterns)
+			not check_file_patterns(cond.excluded_file_patterns, true)
+			and check_file_patterns(cond.file_patterns)
 		then
-			local start_pos_result, end_pos_result, url = text:find(pattern, start_pos)
+			local start_pos_result, end_pos_result, url = text:find(cond.pattern, start_pos)
 			if
 				url
 				and found_url_smaller_pos > start_pos_result
-				and check_condition_pattern(url, subs.extra_condition)
+				and check_condition_pattern(url, cond.extra_condition)
 			then
 				found_url_smaller_pos = start_pos_result
-				url_found = (subs.prefix or "") .. url .. (subs.suffix or "")
+				url_found = (cond.prefix or "") .. url .. (cond.suffix or "")
 				start_found, end_found = start_pos_result, end_pos_result
 			end
 		end
 	end
+
 	return start_found, end_found, url_found
 end
 
