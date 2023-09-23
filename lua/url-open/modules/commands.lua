@@ -26,7 +26,7 @@ M.setup = function(user_opts)
 	end, { nargs = 0 })
 
 	new_cmd(
-		"URLOpenStopHighlightAll",
+		"URLOpenHighlightAllClear",
 		function() handlers.delete_url_effect("URLOpenHighlightAll") end,
 		{ nargs = 0 }
 	)
