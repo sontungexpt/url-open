@@ -135,8 +135,8 @@ local find_first_url_matching_patterns = function(text, patterns, start_pos, fou
 				and check_condition_pattern(url, subs.extra_condition)
 			then
 				found_url_smaller_pos = start_pos_result
-				url = (subs.prefix or "") .. url .. (subs.suffix or "")
-				start_found, end_found, url_found = start_pos_result, end_pos_result, url
+				url_found = (subs.prefix or "") .. url .. (subs.suffix or "")
+				start_found, end_found = start_pos_result, end_pos_result
 			end
 		end
 	end
