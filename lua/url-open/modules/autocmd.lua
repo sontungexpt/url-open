@@ -19,22 +19,22 @@ M.setup = function(user_opts)
 	local highlight_url = user_opts.highlight_url
 
 	if highlight_url.all_urls.enabled then
-		api.nvim_command("HighlightAllUrls") -- Highlight all urls on startup
+		api.nvim_command("URLOpenHighlightAll") -- Highlight all urls on startup
 
 		autocmd({ "BufEnter", "WinEnter" }, {
 			desc = "Highlight all urls in the buffer",
-			group = augroup("HighlightAllUrl", { clear = true }),
-			command = "HighlightAllUrls",
+			group = augroup("URLOpenHighlightAll", { clear = true }),
+			command = "URLOpenHighlightAll",
 		})
 	end
 
 	if highlight_url.cursor_move.enabled then
 		autocmd({ "CursorMoved" }, {
 			desc = "Highlight the url under the cursor",
-			group = augroup("HighlightCursorUrl", { clear = true }),
+			group = augroup("URLOpenHighlightCursor", { clear = true }),
 			callback = function()
 				handlers.highlight_cursor_url(user_opts)
-				handlers.change_color_highlight(highlight_url.cursor_move, "HighlightCursorUrl")
+				handlers.change_color_highlight(highlight_url.cursor_move, "URLOpenHighlightCursor")
 			end,
 		})
 	end
