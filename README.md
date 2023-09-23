@@ -58,7 +58,7 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 -- lazy.nvim
 {
     "sontungexpt/url-open",
-    event = "VeryLazy"
+    event = "VeryLazy",
     cmd = "URLOpenUnderCursor",
     config = function()
         local status_ok, url_open = pcall(require, "url-open")
@@ -78,7 +78,7 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 {
     "sontungexpt/url-open",
     branch = "mini",
-    event = "VeryLazy"
+    event = "VeryLazy",
     cmd = "URLOpenUnderCursor",
     config = function()
         local status_ok, url_open = pcall(require, "url-open")
