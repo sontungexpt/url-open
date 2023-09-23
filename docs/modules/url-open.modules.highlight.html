@@ -43,8 +43,8 @@
   <li><a href="../modules/url-open.modules.autocmd.html">url-open.modules.autocmd</a></li>
   <li><a href="../modules/url-open.modules.commands.html">url-open.modules.commands</a></li>
   <li><a href="../modules/url-open.modules.handlers.html">url-open.modules.handlers</a></li>
-  <li><a href="../modules/url-open.modules.highlight.html">url-open.modules.highlight</a></li>
-  <li><strong>url-open.modules.logger</strong></li>
+  <li><strong>url-open.modules.highlight</strong></li>
+  <li><a href="../modules/url-open.modules.logger.html">url-open.modules.logger</a></li>
   <li><a href="../modules/url-open.modules.options.html">url-open.modules.options</a></li>
   <li><a href="../modules/url-open.modules.patterns.html">url-open.modules.patterns</a></li>
 </ul>
@@ -57,8 +57,8 @@
 
 <div id="content">
 
-<h1>Module <code>url-open.modules.logger</code></h1>
-<p>This module provides a simple wrapper around vim.notify to make it easier to</p>
+<h1>Module <code>url-open.modules.highlight</code></h1>
+<p>The module for working with the highlight effects.</p>
 <p>
 
 </p>
@@ -67,16 +67,20 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#error">error (msg[, opts])</a></td>
-	<td class="summary">Show error level notification</td>
+	<td class="name" nowrap><a href="#change_color_highlight">change_color_highlight (opts, group_name)</a></td>
+	<td class="summary">Change the color of the highlight</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#info">info (msg[, opts])</a></td>
-	<td class="summary">Show info level notification</td>
+	<td class="name" nowrap><a href="#delete_url_effect">delete_url_effect (group_name)</a></td>
+	<td class="summary">Delete the syntax matching rules for URLs/URIs if set.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#warn">warn (msg[, opts])</a></td>
-	<td class="summary">Show warn level notification</td>
+	<td class="name" nowrap><a href="#highlight_cursor_url">highlight_cursor_url (user_opts)</a></td>
+	<td class="summary">Highlight the url under the cursor</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_url_effect">set_url_effect (user_opts)</a></td>
+	<td class="summary">Add syntax matching rules for highlighting URLs/URIs.</td>
 	</tr>
 </table>
 
@@ -88,23 +92,48 @@
 
     <dl class="function">
     <dt>
-    <a name = "error"></a>
-    <strong>error (msg[, opts])</strong>
+    <a name = "change_color_highlight"></a>
+    <strong>change_color_highlight (opts, group_name)</strong>
     </dt>
     <dd>
-    Show error level notification
+    Change the color of the highlight
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">msg</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         : The message to show
-        </li>
         <li><span class="parameter">opts</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : The options to pass to vim.notify
-         (<em>optional</em>)
+         : The user options
+        </li>
+        <li><span class="parameter">group_name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         : The name of the highlight group
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/url-open.modules.options.html#">url-open.modules.options</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "delete_url_effect"></a>
+    <strong>delete_url_effect (group_name)</strong>
+    </dt>
+    <dd>
+    Delete the syntax matching rules for URLs/URIs if set.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">group_name</span>
+
+
+
         </li>
     </ul>
 
@@ -114,54 +143,54 @@
 
 </dd>
     <dt>
-    <a name = "info"></a>
-    <strong>info (msg[, opts])</strong>
+    <a name = "highlight_cursor_url"></a>
+    <strong>highlight_cursor_url (user_opts)</strong>
     </dt>
     <dd>
-    Show info level notification
+    Highlight the url under the cursor
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">msg</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         : The message to show
-        </li>
-        <li><span class="parameter">opts</span>
+        <li><span class="parameter">user_opts</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : The options to pass to vim.notify
-         (<em>optional</em>)
+         : User options
         </li>
     </ul>
 
 
 
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/url-open.modules.options.html#">url-open.modules.options</a>
+    </ul>
 
 
 </dd>
     <dt>
-    <a name = "warn"></a>
-    <strong>warn (msg[, opts])</strong>
+    <a name = "set_url_effect"></a>
+    <strong>set_url_effect (user_opts)</strong>
     </dt>
     <dd>
-    Show warn level notification
+    Add syntax matching rules for highlighting URLs/URIs.
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">msg</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         : The message to show
-        </li>
-        <li><span class="parameter">opts</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : The options to pass to vim.notify
-         (<em>optional</em>)
+        <li><span class="parameter">user_opts</span>
+
+
+
         </li>
     </ul>
 
 
 
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/url-open.modules.options.html#">url-open.modules.options</a></li>
+         <li><a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a></li>
+    </ul>
 
 
 </dd>

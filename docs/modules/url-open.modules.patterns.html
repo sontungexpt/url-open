@@ -33,6 +33,7 @@
 
 <h2>Contents</h2>
 <ul>
+<li><a href="#Tables">Tables</a></li>
 <li><a href="#Fields">Fields</a></li>
 </ul>
 
@@ -43,6 +44,7 @@
   <li><a href="../modules/url-open.modules.autocmd.html">url-open.modules.autocmd</a></li>
   <li><a href="../modules/url-open.modules.commands.html">url-open.modules.commands</a></li>
   <li><a href="../modules/url-open.modules.handlers.html">url-open.modules.handlers</a></li>
+  <li><a href="../modules/url-open.modules.highlight.html">url-open.modules.highlight</a></li>
   <li><a href="../modules/url-open.modules.logger.html">url-open.modules.logger</a></li>
   <li><a href="../modules/url-open.modules.options.html">url-open.modules.options</a></li>
   <li><strong>url-open.modules.patterns</strong></li>
@@ -63,6 +65,13 @@
 </p>
 
 
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#PATTERNS">PATTERNS</a></td>
+	<td class="summary">Default Patterns to match urls.</td>
+	</tr>
+</table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
@@ -75,6 +84,116 @@
 <br/>
 
 
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "PATTERNS"></a>
+    <strong>PATTERNS</strong>
+    </dt>
+    <dd>
+    Default Patterns to match urls. </p>
+
+<p> Http(s) URL pattern
+ Matches URLs starting with "http://" or "https://"
+ Example: "http://example.com", "https://www.example.com"
+ Pattern: "(https?://[%w-<em>%.]+%.%w[%w-</em>%.%%%?%.:/+=&amp;%%[%]#&lt;>]*)"
+ Prefix: ""
+ Suffix: ""
+ File<em>patterns: All files
+ Extra</em>condition: None
+ Excluded<em>file</em>patterns: None
+ Note: This pattern is used to match urls in all files</p>
+
+
+<p> Npm Package pattern
+ Matches npm package names
+ Example: "react", "react-dom"
+ Pattern: '<a href="[^%s]*">"</a>["]:%s<em>"[^"]</em>%d[%d%.]*"'
+ Prefix: "https://www.npmjs.com/package/"
+ Suffix: ""
+ File<em>patterns: "package%.json"
+ Extra</em>condition: pattern<em>found ~= "version" and pattern</em>found ~= "proxy"
+ Excluded<em>file</em>patterns: None
+ Note: This pattern is used to match npm packages in package.json files</p>
+
+<p> Git Plugin pattern
+ Matches git plugin names
+ Example: "airblade/vim-gitgutter", "tpope/vim-fugitive"
+ Pattern: "<a href="[^%s~/]*/[^%s~/]*">\"'</a>[\"']"
+ Prefix: "https://github.com/"
+ Suffix: ""
+ File<em>patterns: All files except package.json and package-lock.json
+ Extra</em>condition: None
+ Excluded<em>file</em>patterns: "package%.json", "package%-lock%.json"
+ Note: This pattern is used to match git plugins in all files except package.json and package-lock.json</p>
+
+
+<p> Brew Formula pattern
+ Matches brew formula names
+ Example: "bat", "exa"
+ Pattern: 'brew <a href="[^%s]*">"</a>["]'
+ Prefix: "https://formulae.brew.sh/formula/"
+ Suffix: ""
+ File<em>patterns: All files
+ Extra</em>condition: None
+ Excluded<em>file</em>patterns: None
+ Note: This pattern is used to match brew formulas in all files</p>
+
+<p> Cask Formula pattern
+ Matches cask formula names
+ Example: "firefox", "google-chrome"
+ Pattern: 'cask <a href="[^%s]*">"</a>["]'
+ Prefix: "https://formulae.brew.sh/cask/"
+ Suffix: ""
+ File<em>patterns: All files
+ Extra</em>condition: None
+ Excluded<em>file</em>patterns: None
+ Note: This pattern is used to match cask formulas in all files</p>
+
+<p> Cargo Package pattern
+ Matches cargo package names
+ Example: "serde", "serde<em>json"
+ Pattern: "^%s*([%w</em>]+)%s*="
+ Prefix: "https://crates.io/crates/"
+ Suffix: ""
+ File<em>patterns: "Cargo%.toml"
+ Extra</em>condition: not vim.tbl<em>contains({
+   "name",
+   "version",
+   "edition",
+   "authors",
+   "description",
+   "license",
+   "repository",
+   "homepage",
+   "documentation",
+   "keywords",
+   }, pattern</em>found)
+ Excluded<em>file</em>patterns: None
+ Note: This pattern is used to match cargo packages in Cargo.toml files
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">suffix</span>
+
+
+
+        </li>
+        <li><span class="parameter">file_patterns</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
     <h2 class="section-header "><a name="Fields"></a>Fields</h2>
 
     <dl class="function">
@@ -84,43 +203,19 @@
     </dt>
     <dd>
     Deep Pattern to match urls from text.  This pattern will find urls in the following formats:
+  http://example.com
+  https://www.example.com
+  ftp://ftp.example.com
+  file:///path/to/file.txt
+  ssh://user@hostname
+  git://github.com/user/repo
+  http://example.com/path?param=value
+  https://www.example.com/another/path#section
+  http://example.com:8080
+  https://www.example.com:8443
+  ftp://ftp.example.com:2121
 
 
-    <ul>
-        <li><span class="parameter">http:</span>
-        //example.com:8080
-        </li>
-        <li><span class="parameter">https:</span>
-        //www.example.com:8443
-        </li>
-        <li><span class="parameter">ftp:</span>
-        //ftp.example.com:2121
-        </li>
-        <li><span class="parameter">file:</span>
-        ///path/to/file.txt
-        </li>
-        <li><span class="parameter">ssh:</span>
-        //user@hostname
-        </li>
-        <li><span class="parameter">git:</span>
-        //github.com/user/repo
-        </li>
-        <li><span class="parameter">http:</span>
-        //example.com:8080
-        </li>
-        <li><span class="parameter">https:</span>
-        //www.example.com:8443
-        </li>
-        <li><span class="parameter">http:</span>
-        //example.com:8080
-        </li>
-        <li><span class="parameter">https:</span>
-        //www.example.com:8443
-        </li>
-        <li><span class="parameter">ftp:</span>
-        //ftp.example.com:2121
-        </li>
-    </ul>
 
 
 
@@ -134,7 +229,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-22 09:34:57 </i>
+<i style="float:right;">Last updated 2023-09-23 12:16:00 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 

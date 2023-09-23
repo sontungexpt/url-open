@@ -43,6 +43,7 @@
   <li><a href="../modules/url-open.modules.autocmd.html">url-open.modules.autocmd</a></li>
   <li><a href="../modules/url-open.modules.commands.html">url-open.modules.commands</a></li>
   <li><a href="../modules/url-open.modules.handlers.html">url-open.modules.handlers</a></li>
+  <li><a href="../modules/url-open.modules.highlight.html">url-open.modules.highlight</a></li>
   <li><a href="../modules/url-open.modules.logger.html">url-open.modules.logger</a></li>
   <li><a href="../modules/url-open.modules.options.html">url-open.modules.options</a></li>
   <li><a href="../modules/url-open.modules.patterns.html">url-open.modules.patterns</a></li>
@@ -55,20 +56,20 @@
 
 <h2>Introduction</h2>
 
-<p>This plugin allow you to open url under cursor in neovim without netrw with
-default browser of your system.</p>
+<p>This plugin enables you to effortlessly open the URL under the cursor in Neovim, bypassing the need for netrw, and instead utilizing the default browser of your system.
+It provides the convenience of automatically detecting and highlighting all URLs within the text content.</p>
 
-<p>NOTE: Since I am the linux user so i only test this plugin on linux, if you
+<p><strong>NOTE:</strong> Since I am the linux user so i only test this plugin on linux, if you
 are using macos or windows and you have any problem with this plugin, please
 open an issue or create a pull request to fix it</p>
 
 <ul>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#installation">Installation</a></li>
-    <li><a href="#configuration">Configuration</a></li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
+    <li>🚀 <a href="#features">Features</a></li>
+    <li>👀 <a href="#installation">Installation</a></li>
+    <li>💻 <a href="#configuration">Configuration</a></li>
+    <li>😆 <a href="#usage">Usage</a></li>
+    <li>😁 <a href="#contributing">Contributing</a></li>
+    <li>✌️ <a href="#license">License</a></li>
 </ul>
 
 
@@ -78,12 +79,17 @@ open an issue or create a pull request to fix it</p>
 <h2>Features</h2>
 
 <ul>
-    <li>Highlight all urls in the buffer and highlight url that can be opened when cursor move over it</li>
-    <li>Open the url under cursor include markdown link (e.g. <code>https://github.com/sontungexpt/url-open</code>)</li>
-    <li>Open the github page of neovim plugin name under cursor (e.g. <code>Plug &apos;nvim-lua/plenary.nvim&apos;</code>, "sontungexpt/url-open")</li>
-    <li>Open the npm package in package.json (e.g. <code>&quot;lodash&quot;: &quot;^4.17.21&quot;,</code>)</li>
-    <li>Support brew formula, and cask</li>
-    <li>Support deep pattern (disabled by default) to match with url below</li>
+    <li>🎨 Automatically detect and highlight all URLs within the text content and
+    provide visual cues when hovering over clickable URLs.</li>
+    <li>🛠️ Allow for opening URLs from anywhere on a line, as long as the line contains only one URL.
+    If one line has multiple URLs, the first URLs in the right side of cursor will be opened.</li>
+    <li>🎉 Open the URLs under the cursor, including the Markdown link (e.g. <code>https://github.com/sontungexpt/url-open</code>).</li>
+    <li>✈️ Open the GitHub page for the Neovim plugin mentioned under the cursor
+    (e.g. <code>Plug &apos;nvim-lua/plenary.nvim&apos;</code>, "sontungexpt/url-open").</li>
+    <li>🍨 Easily open the npm package specified in the package.json file. (e.g. <code>&quot;lodash&quot;: &quot;^4.17.21&quot;,</code>).</li>
+    <li>Extend support for recognized formats, including brew formulas and casks.</li>
+    <li>🚀 Provide an optional deep pattern matching feature,
+    which can be enabled, to accurately identify and handle various URL formats, such as:</li>
     <li>http://example.com</li>
     <li>https://www.example.com</li>
     <li>ftp://ftp.example.com</li>
@@ -95,14 +101,9 @@ open an issue or create a pull request to fix it</p>
     <li>http://example.com:8080</li>
     <li>https://www.example.com:8443</li>
     <li>ftp://ftp.example.com:2121</li>
-    <li>Allow you to open url from anywhere in the line if it only contains 1 url</li>
 </ul>
 
 <h2>Preview</h2>
-
-<ul>
-    <li>Highlight url which can be opened then you can open it by <code>:OpenUrlUnderCursor</code></li>
-</ul>
 
 <p><img src="./docs/readme/preview1.png" alt="highlight-url"/></p>
 
@@ -120,7 +121,7 @@ open an issue or create a pull request to fix it</p>
 </span>{
     <span class="string">"sontungexpt/url-open"</span>,
     event = <span class="string">"VeryLazy"</span>
-    cmd = <span class="string">"OpenUrlUnderCursor"</span>,
+    cmd = <span class="string">"URLOpenUnderCursor"</span>,
     config = <span class="keyword">function</span>()
         <span class="keyword">local</span> status_ok, url_open = <span class="global">pcall</span>(<span class="global">require</span>, <span class="string">"url-open"</span>)
         <span class="keyword">if</span> <span class="keyword">not</span> status_ok <span class="keyword">then</span>
@@ -144,7 +145,7 @@ open an issue or create a pull request to fix it</p>
     <span class="string">"sontungexpt/url-open"</span>,
     branch = <span class="string">"mini"</span>,
     event = <span class="string">"VeryLazy"</span>
-    cmd = <span class="string">"OpenUrlUnderCursor"</span>,
+    cmd = <span class="string">"URLOpenUnderCursor"</span>,
     config = <span class="keyword">function</span>()
         <span class="keyword">local</span> status_ok, url_open = <span class="global">pcall</span>(<span class="global">require</span>, <span class="string">"url-open"</span>)
         <span class="keyword">if</span> <span class="keyword">not</span> status_ok <span class="keyword">then</span>
@@ -164,13 +165,13 @@ open an issue or create a pull request to fix it</p>
 <pre>
 <span class="comment">-- default values
 </span><span class="global">require</span>(<span class="string">"url_open"</span>).<span class="function-name">setup</span>({
-    <span class="comment">-- if true, only open url when cursor in the middle of url
-</span>    <span class="comment">-- if false, open next url found from cursor position it means you can open
-</span>    <span class="comment">-- url even when the cursor is in front of url or in the middle of url
-</span>    open_app = <span class="string">"default"</span>,
     <span class="comment">-- default will open url with default browser of your system or you can choose your browser like this
 </span>    <span class="comment">-- open_app = "micorsoft-edge-stable",
 </span>    <span class="comment">-- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
+</span>    open_app = <span class="string">"default"</span>,
+    <span class="comment">-- If true, only open the URL when the cursor is in the middle of the URL.
+</span>    <span class="comment">-- If false, open the next URL found from the cursor position,
+</span>    <span class="comment">-- which means you can open a URL even when the cursor is in front of the URL or in the middle of the URL.
 </span>    open_only_when_cursor_on_url = <span class="keyword">false</span>,
     highlight_url = {
         all_urls = {
@@ -196,7 +197,9 @@ open an issue or create a pull request to fix it</p>
 </span>        <span class="comment">--      suffix = ""
 </span>        <span class="comment">--      file_patterns = { "package%.json" }, -- support for only specific file match with pattern
 </span>        <span class="comment">--      excluded_file_patterns = {}, -- exclude file match with pattern
-</span>        <span class="comment">--      extra_condition = function() return true end, -- need to return boolean
+</span>     <span class="comment">--      extra_condition = function(pattern_found) -- the function will be called when pattern found and return boolean
+</span>     <span class="comment">--            return pattern_found ~= "version" and pattern_found ~= "proxy"
+</span>     <span class="comment">--      end,
 </span>        <span class="comment">-- },
 </span>
         <span class="comment">-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
@@ -220,20 +223,21 @@ open an issue or create a pull request to fix it</p>
 
 <h2>Usage</h2>
 
+<p>| <strong>Command</strong>                 | <strong>Description</strong>                           |
+| --------------------------- | ----------------------------------------- |
+| <code>:URLOpenUnderCursor</code>       | Open url under cursor                     |
+| <code>:URLOpenHighlightAll</code>      | Highlight all url in current buffer       |
+| <code>:URLOpenHighlightAllClear</code> | Clear all highlight url in current buffer |</p>
+
 <ul>
-    <li><p>This plugin provide a command <code>:OpenUrlUnderCursor</code> to open url under cursor</p></li>
-    <li><p>This plugin will not map any key by default, you can map it by yourself</p></li>
+    <li>This plugin will not map any key by default, you can map it by yourself</li>
 </ul>
 
 
 <pre>
-vim.keymap.<span class="function-name">set</span>(<span class="string">"n"</span>, <span class="string">"gx"</span>, <span class="string">"&lt;esc&gt;:OpenUrlUnderCursor&lt;cr&gt;"</span>)
+vim.keymap.<span class="function-name">set</span>(<span class="string">"n"</span>, <span class="string">"gx"</span>, <span class="string">"&lt;esc&gt;:URLOpenUnderCursor&lt;cr&gt;"</span>)
 </pre>
 
-
-<ul>
-    <li>You can also use command <code>:HighlightAllUrls</code> to highlight all urls in the buffer manually</li>
-</ul>
 
 <h2>Contributing</h2>
 
@@ -248,7 +252,7 @@ vim.keymap.<span class="function-name">set</span>(<span class="string">"n"</span
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-22 09:34:57 </i>
+<i style="float:right;">Last updated 2023-09-23 12:16:00 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 

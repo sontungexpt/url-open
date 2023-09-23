@@ -1,3 +1,5 @@
+--- The module for working with the highlight effects.
+--
 local M = {}
 
 local api = vim.api

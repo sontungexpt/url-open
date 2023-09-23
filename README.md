@@ -7,25 +7,27 @@ It provides the convenience of automatically detecting and highlighting all URLs
 are using macos or windows and you have any problem with this plugin, please
 open an issue or create a pull request to fix it
 
-- [Features](#features)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
+- 🚀 [Features](#features)
+- 👀 [Installation](#installation)
+- 💻 [Configuration](#configuration)
+- 😆 [Usage](#usage)
+- 😁 [Contributing](#contributing)
+- ✌️ [License](#license)
 
 <!--toc:end-->
 
 ## Features
 
-- Automatically detect and highlight all URLs within the text content and
+- 🎨 Automatically detect and highlight all URLs within the text content and
   provide visual cues when hovering over clickable URLs.
-- Open the URLs under the cursor, including the Markdown link (e.g. `https://github.com/sontungexpt/url-open`).
-- Open the GitHub page for the Neovim plugin mentioned under the cursor
+- 🛠️ Allow for opening URLs from anywhere on a line, as long as the line contains only one URL.
+  If one line has multiple URLs, the first URLs in the right side of cursor will be opened.
+- 🎉 Open the URLs under the cursor, including the Markdown link (e.g. `https://github.com/sontungexpt/url-open`).
+- ✈️ Open the GitHub page for the Neovim plugin mentioned under the cursor
   (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open").
-- Easily open the npm package specified in the package.json file. (e.g. `"lodash": "^4.17.21",`).
+- 🍨 Easily open the npm package specified in the package.json file. (e.g. `"lodash": "^4.17.21",`).
 - Extend support for recognized formats, including brew formulas and casks.
-- Provide an optional deep pattern matching feature,
+- 🚀 Provide an optional deep pattern matching feature,
   which can be enabled, to accurately identify and handle various URL formats, such as:
   - http://example.com
   - https://www.example.com
@@ -38,12 +40,8 @@ open an issue or create a pull request to fix it
   - http://example.com:8080
   - https://www.example.com:8443
   - ftp://ftp.example.com:2121
-- Allow for opening URLs from anywhere on a line, as long as the line contains only one URL.
-  If one line has multiple URLs, the first URLs in the right side of cursor will be opened.
 
 ## Preview
-
-- Highlight url which can be opened then you can open it by `:OpenUrlUnderCursor`
 
 ![highlight-url](./docs/readme/preview1.png)
 
@@ -60,7 +58,7 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 {
     "sontungexpt/url-open",
     event = "VeryLazy"
-    cmd = "OpenUrlUnderCursor",
+    cmd = "URLOpenUnderCursor",
     config = function()
         local status_ok, url_open = pcall(require, "url-open")
         if not status_ok then
@@ -80,7 +78,7 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
     "sontungexpt/url-open",
     branch = "mini",
     event = "VeryLazy"
-    cmd = "OpenUrlUnderCursor",
+    cmd = "URLOpenUnderCursor",
     config = function()
         local status_ok, url_open = pcall(require, "url-open")
         if not status_ok then
@@ -130,7 +128,9 @@ require("url_open").setup({
         --      suffix = ""
         --      file_patterns = { "package%.json" }, -- support for only specific file match with pattern
         --      excluded_file_patterns = {}, -- exclude file match with pattern
-        --      extra_condition = function() return true end, -- need to return boolean
+		--      extra_condition = function(pattern_found) -- the function will be called when pattern found and return boolean
+		-- 	        return pattern_found ~= "version" and pattern_found ~= "proxy"
+		--      end,
         -- },
 
 		-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
@@ -153,15 +153,17 @@ require("url_open").setup({
 
 ## Usage
 
-- This plugin provide a command `:OpenUrlUnderCursor` to open url under cursor
+| **Command**                 | **Description**                           |
+| --------------------------- | ----------------------------------------- |
+| `:URLOpenUnderCursor`       | Open url under cursor                     |
+| `:URLOpenHighlightAll`      | Highlight all url in current buffer       |
+| `:URLOpenHighlightAllClear` | Clear all highlight url in current buffer |
 
 - This plugin will not map any key by default, you can map it by yourself
 
 ```lua
-vim.keymap.set("n", "gx", "<esc>:OpenUrlUnderCursor<cr>")
+vim.keymap.set("n", "gx", "<esc>:URLOpenUnderCursor<cr>")
 ```
-
-- You can also use command `:HighlightAllUrls` to highlight all urls in the buffer manually
 
 ## Contributing
 

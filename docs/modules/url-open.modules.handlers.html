@@ -43,6 +43,7 @@
   <li><a href="../modules/url-open.modules.autocmd.html">url-open.modules.autocmd</a></li>
   <li><a href="../modules/url-open.modules.commands.html">url-open.modules.commands</a></li>
   <li><strong>url-open.modules.handlers</strong></li>
+  <li><a href="../modules/url-open.modules.highlight.html">url-open.modules.highlight</a></li>
   <li><a href="../modules/url-open.modules.logger.html">url-open.modules.logger</a></li>
   <li><a href="../modules/url-open.modules.options.html">url-open.modules.options</a></li>
   <li><a href="../modules/url-open.modules.patterns.html">url-open.modules.patterns</a></li>
@@ -70,28 +71,20 @@
 	<td class="summary">Call a vim command</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#change_color_highlight">change_color_highlight (opts, group_name)</a></td>
-	<td class="summary">Change the color of the highlight</td>
+	<td class="name" nowrap><a href="#check_condition_pattern">check_condition_pattern (pattern_found, condition)</a></td>
+	<td class="summary">Check if the pattern found matches the condition</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#check_file_patterns">check_file_patterns (file_patterns, is_excluded)</a></td>
 	<td class="summary">Check if the file path matches any of the patterns</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#delete_url_effect">delete_url_effect (group_name)</a></td>
-	<td class="summary">Delete the syntax matching rules for URLs/URIs if set.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#find_first_url_in_text">find_first_url_in_text (user_opts, text, start_pos)</a></td>
-	<td class="summary">Find the first url in the text</td>
+	<td class="name" nowrap><a href="#find_first_url_in_line">find_first_url_in_line (user_opts, text, start_pos)</a></td>
+	<td class="summary">Find the first url in the line</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#find_first_url_matching_patterns">find_first_url_matching_patterns (text, patterns, start_pos, found_url_smaller_pos)</a></td>
-	<td class="summary">Check if the text contains any of the patterns</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#highlight_cursor_url">highlight_cursor_url (user_opts)</a></td>
-	<td class="summary">Highlight the url under the cursor</td>
+	<td class="summary">Find the first url in the text that matches any of the patterns</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#open_url">open_url (user_opts)</a></td>
@@ -99,8 +92,12 @@
  If there is only one url in the line, then open it anywhere in the line.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#set_url_effect">set_url_effect (user_opts)</a></td>
-	<td class="summary">Add syntax matching rules for highlighting URLs/URIs.</td>
+	<td class="name" nowrap><a href="#open_url_with_app">open_url_with_app (apps, url)</a></td>
+	<td class="summary">Open the url with the specified app</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system_open_url">system_open_url (user_opts, url)</a></td>
+	<td class="summary">Open the url relying on the operating system</td>
 	</tr>
 </table>
 
@@ -137,41 +134,36 @@
 
 </dd>
     <dt>
-    <a name = "change_color_highlight"></a>
-    <strong>change_color_highlight (opts, group_name)</strong>
+    <a name = "check_condition_pattern"></a>
+    <strong>check_condition_pattern (pattern_found, condition)</strong>
     </dt>
     <dd>
-    Change the color of the highlight
+    Check if the pattern found matches the condition
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">opts</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : The user options
-        </li>
-        <li><span class="parameter">group_name</span>
+        <li><span class="parameter">pattern_found</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         : The name of the highlight group
+         : The url to check
+        </li>
+        <li><span class="parameter">condition</span>
+            <span class="types"><span class="type">function</span> or <span class="type">boolean</span></span>
+         : The condition to check (function(pattern_found))
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><span class="type">nil</span></span>
-
-
-
+           <span class="types"><span class="type">boolean</span></span>
+        : True if the pattern found matches the condition, otherwise false
     </ol>
 
 
     <h3>See also:</h3>
     <ul>
-         <li><a href="../modules/url-open.modules.handlers.html#highlight_cursor_url">url-open.modules.handlers.highlight_cursor_url</a></li>
-         <li><a href="../modules/url-open.modules.handlers.html#set_url_effect">url-open.modules.handlers.set_url_effect</a></li>
-         <li><a href="../modules/url-open.modules.autocmd.html#setup">url-open.modules.autocmd.setup</a></li>
-         <li><a href="../modules/url-open.html#Plugin.setup">url-open.setup</a></li>
+         <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
     </ul>
 
 
@@ -208,33 +200,11 @@
 
 </dd>
     <dt>
-    <a name = "delete_url_effect"></a>
-    <strong>delete_url_effect (group_name)</strong>
+    <a name = "find_first_url_in_line"></a>
+    <strong>find_first_url_in_line (user_opts, text, start_pos)</strong>
     </dt>
     <dd>
-    Delete the syntax matching rules for URLs/URIs if set.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">group_name</span>
-
-
-
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "find_first_url_in_text"></a>
-    <strong>find_first_url_in_text (user_opts, text, start_pos)</strong>
-    </dt>
-    <dd>
-    Find the first url in the text
+    Find the first url in the line
 
 
     <h3>Parameters:</h3>
@@ -263,7 +233,9 @@
 
     <h3>See also:</h3>
     <ul>
-         <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
+         <li><a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a></li>
+         <li><a href="../modules/url-open.modules.options.html#">url-open.modules.options</a></li>
+         <li><a href="../modules/url-open.modules.handlers.html#find_first_url_matching_patterns">url-open.modules.handlers.find_first_url_matching_patterns</a></li>
     </ul>
 
 
@@ -273,7 +245,7 @@
     <strong>find_first_url_matching_patterns (text, patterns, start_pos, found_url_smaller_pos)</strong>
     </dt>
     <dd>
-    Check if the text contains any of the patterns
+    Find the first url in the text that matches any of the patterns
 
 
     <h3>Parameters:</h3>
@@ -306,31 +278,6 @@
 
 </dd>
     <dt>
-    <a name = "highlight_cursor_url"></a>
-    <strong>highlight_cursor_url (user_opts)</strong>
-    </dt>
-    <dd>
-    Highlight the url under the cursor
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">user_opts</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : User options
-        </li>
-    </ul>
-
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
-    </ul>
-
-
-</dd>
-    <dt>
     <a name = "open_url"></a>
     <strong>open_url (user_opts)</strong>
     </dt>
@@ -349,23 +296,32 @@
 
 
 
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/url-open.modules.options.html#">url-open.modules.options</a></li>
+         <li><a href="../modules/url-open.modules.handlers.html#find_first_url_in_line">url-open.modules.handlers.find_first_url_in_line</a></li>
+         <li><a href="../modules/url-open.modules.handlers.html#system_open_url">url-open.modules.handlers.system_open_url</a></li>
+    </ul>
 
 
 </dd>
     <dt>
-    <a name = "set_url_effect"></a>
-    <strong>set_url_effect (user_opts)</strong>
+    <a name = "open_url_with_app"></a>
+    <strong>open_url_with_app (apps, url)</strong>
     </dt>
     <dd>
-    Add syntax matching rules for highlighting URLs/URIs.
+    Open the url with the specified app
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">user_opts</span>
-
-
-
+        <li><span class="parameter">apps</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         : The table of apps to open the url
+        </li>
+        <li><span class="parameter">url</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         : The url to open
         </li>
     </ul>
 
@@ -373,7 +329,36 @@
 
     <h3>See also:</h3>
     <ul>
-         <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
+         <a href="../modules/url-open.modules.handlers.html#call_cmd">url-open.modules.handlers.call_cmd</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "system_open_url"></a>
+    <strong>system_open_url (user_opts, url)</strong>
+    </dt>
+    <dd>
+    Open the url relying on the operating system
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">user_opts</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         : User options
+        </li>
+        <li><span class="parameter">url</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         : The url to open
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/url-open.modules.handlers.html#open_url_with_app">url-open.modules.handlers.open_url_with_app</a>
     </ul>
 
 
@@ -385,7 +370,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-22 09:34:57 </i>
+<i style="float:right;">Last updated 2023-09-23 12:16:00 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 

@@ -107,20 +107,20 @@ M.PATTERNS = {
 		extra_condition = function(pattern_found)
 			return pattern_found ~= "version" and pattern_found ~= "proxy"
 		end,
-	}, --- npm package
+	}, -- npm package
 	["[\"']([^%s~/]*/[^%s~/]*)[\"']"] = {
 		prefix = "https://github.com/",
 		suffix = "",
 		excluded_file_patterns = { "package%.json", "package%-lock%.json" },
-	}, --- plugin name git
+	}, -- plugin name git
 	['brew ["]([^%s]*)["]'] = {
 		prefix = "https://formulae.brew.sh/formula/",
 		suffix = "",
-	}, --- brew formula
+	}, -- brew formula
 	['cask ["]([^%s]*)["]'] = {
 		prefix = "https://formulae.brew.sh/cask/",
 		suffix = "",
-	}, --- cask formula
+	}, -- cask formula
 	["^%s*([%w_]+)%s*="] = {
 		prefix = "https://crates.io/crates/",
 		suffix = "",
@@ -139,7 +139,7 @@ M.PATTERNS = {
 				"keywords",
 			}, pattern_found)
 		end,
-	}, --- cargo package
+	}, -- cargo package
 }
 
 return M

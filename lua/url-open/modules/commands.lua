@@ -10,8 +10,8 @@ local highlight = require("url-open.modules.highlight")
 --- Setup the OpenUrlUnderCursor command and URLOpenHighlightAlls command.
 --- @tparam table user_opts : User options.
 --- @see url-open.modules.handlers.open_url
---- @see url-open.modules.handlers.set_url_effect
---- @see url-open.modules.handlers.change_color_highlight
+--- @see url-open.modules.highlight.set_url_effect
+--- @see url-open.modules.highlight.change_color_highlight
 --- @usage require("url-open.modules.commands").setup(opts)
 M.setup = function(user_opts)
 	new_cmd("OpenUrlUnderCursor", function()
