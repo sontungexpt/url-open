@@ -26,7 +26,8 @@ open an issue or create a pull request to fix it
 - ✈️ Open the GitHub page for the Neovim plugin mentioned under the cursor
   (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open").
 - 🍨 Easily open the npm package specified in the package.json file. (e.g. `"lodash": "^4.17.21",`).
-- Extend support for recognized formats, including brew formulas and casks.
+- 🍻 Open the Homebrew formula or cask specified in the Brewfile.
+- 🍕 Open the cargo package specified in the Cargo.toml file.
 - 🚀 Provide an optional deep pattern matching feature,
   which can be enabled, to accurately identify and handle various URL formats, such as:
   - http://example.com
