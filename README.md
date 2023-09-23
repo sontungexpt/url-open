@@ -122,32 +122,33 @@ require("url_open").setup({
         },
     },
     deep_pattern = false,
+    -- a list of patterns to open url under cursor
     extra_patterns = {
-        -- [pattern] = prefix: string only or nil
-        -- [pattern] = {
-        --      prefix = "",
-        --      suffix = ""
-        --      file_patterns = { "package%.json" }, -- support for only specific file match with pattern
-        --      excluded_file_patterns = {}, -- exclude file match with pattern
-		--      extra_condition = function(pattern_found) -- the function will be called when pattern found and return boolean
-		-- 	        return pattern_found ~= "version" and pattern_found ~= "proxy"
-		--      end,
+        -- {
+        -- 	  pattern = '["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"',
+        -- 	  prefix = "https://www.npmjs.com/package/",
+        -- 	  suffix = "",
+        -- 	  file_patterns = { "package%.json" },
+        -- 	  excluded_file_patterns = nil,
+        -- 	  extra_condition = function(pattern_found)
+        -- 	    return not vim.tbl_contains({ "version", "proxy" }, pattern_found)
+        -- 	  end,
         -- },
-
-		-- Ex: ['["]([^%s]*)["]:'] = "https://www.npmjs.com/package/",
 		-- so the url will be https://www.npmjs.com/package/[pattern_found]
-		--
-		-- Ex: ['["]([^%s]*)["]:'] = {prefix = "https://www.npmjs.com/package/", suffix = "/issues"},
-		-- so the url will be https://www.npmjs.com/package/[pattern_found]/issues
 
-        -- E.g:
-        -- ['["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"'] = {
-        --      prefix = "https://www.npmjs.com/package/",
-        --      suffix = "",
-        --      file_patterns = { "package%.json" },
-        --      excluded_file_patterns = {},
-        --      extra_condition = function() return true end, -- need to return boolean
+
+        -- {
+        -- 	  pattern = '["]([^%s]*)["]:%s*"[^"]*%d[%d%.]*"',
+        -- 	  prefix = "https://www.npmjs.com/package/",
+        -- 	  suffix = "/issues",
+        -- 	  file_patterns = { "package%.json" },
+        -- 	  excluded_file_patterns = nil,
+        -- 	  extra_condition = function(pattern_found)
+        -- 	    return not vim.tbl_contains({ "version", "proxy" }, pattern_found)
+        -- 	  end,
         -- },
+		--
+		-- so the url will be https://www.npmjs.com/package/[pattern_found]/issues
     },
 })
 ```
