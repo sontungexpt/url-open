@@ -121,7 +121,7 @@ local call_cmd = function(command, msg)
 	end
 end
 
-local check_file_patterns = function(file_patterns, is_excluded)
+local matches_file_patterns = function(file_patterns, is_excluded)
 	if type(file_patterns) == "string" then file_patterns = { file_patterns } end
 	if file_patterns == nil or #file_patterns == 0 then return not is_excluded end
 
@@ -132,26 +132,26 @@ local check_file_patterns = function(file_patterns, is_excluded)
 	return false
 end
 
-local check_condition_pattern = function(pattern_found, condition)
+local matches_condition_pattern = function(pattern_found, condition)
 	if type(condition) == "function" then condition = condition(pattern_found) end
 	return type(condition) ~= "boolean" and true or condition
 end
 
-local find_first_url_matching_patterns = function(text, patterns, start_pos, found_url_smaller_pos)
+local find_first_matching_url = function(text, patterns, start_pos, found_url_smaller_pos)
 	found_url_smaller_pos = found_url_smaller_pos or #text
 	start_pos = start_pos or 1
 	local start_found, end_found, url_found = nil, nil, nil
 
 	for _, cond in ipairs(patterns) do
 		if
-			not check_file_patterns(cond.excluded_file_patterns, true)
-			and check_file_patterns(cond.file_patterns)
+			not matches_file_patterns(cond.excluded_file_patterns, true)
+			and matches_file_patterns(cond.file_patterns)
 		then
 			local start_pos_result, end_pos_result, url = text:find(cond.pattern, start_pos)
 			if
 				url
 				and found_url_smaller_pos > start_pos_result
-				and check_condition_pattern(url, cond.extra_condition)
+				and matches_condition_pattern(url, cond.extra_condition)
 			then
 				found_url_smaller_pos = start_pos_result
 				url_found = (cond.prefix or "") .. url .. (cond.suffix or "")
@@ -164,10 +164,10 @@ local find_first_url_matching_patterns = function(text, patterns, start_pos, fou
 end
 
 local find_first_url_in_line = function(user_opts, text, start_pos)
-	local start_found, end_found, url_found = find_first_url_matching_patterns(text, PATTERNS, start_pos)
+	local start_found, end_found, url_found = find_first_matching_url(text, PATTERNS, start_pos)
 
 	local extra_start_found, extra_end_found, extra_url_found =
-		find_first_url_matching_patterns(text, user_opts.extra_patterns, start_pos, start_found)
+		find_first_matching_url(text, user_opts.extra_patterns, start_pos, start_found)
 
 	if extra_start_found then
 		start_found, end_found, url_found = extra_start_found, extra_end_found, extra_url_found
