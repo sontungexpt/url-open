@@ -71,20 +71,20 @@
 	<td class="summary">Call a vim command</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#check_condition_pattern">check_condition_pattern (pattern_found, condition)</a></td>
-	<td class="summary">Check if the pattern found matches the condition</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#check_file_patterns">check_file_patterns (file_patterns, is_excluded)</a></td>
-	<td class="summary">Check if the file path matches any of the patterns</td>
+	<td class="name" nowrap><a href="#find_first_matching_url">find_first_matching_url (text, patterns, start_pos, found_url_smaller_pos)</a></td>
+	<td class="summary">Find the first url in the text that matches any of the patterns</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#find_first_url_in_line">find_first_url_in_line (user_opts, text, start_pos)</a></td>
 	<td class="summary">Find the first url in the line</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#find_first_url_matching_patterns">find_first_url_matching_patterns (text, patterns, start_pos, found_url_smaller_pos)</a></td>
-	<td class="summary">Find the first url in the text that matches any of the patterns</td>
+	<td class="name" nowrap><a href="#matches_condition_pattern">matches_condition_pattern (pattern_found, condition)</a></td>
+	<td class="summary">Check if the pattern found matches the condition</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#matches_file_patterns">matches_file_patterns (file_patterns, is_excluded)</a></td>
+	<td class="summary">Check if the file path matches any of the patterns</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#open_url">open_url (user_opts)</a></td>
@@ -134,68 +134,39 @@
 
 </dd>
     <dt>
-    <a name = "check_condition_pattern"></a>
-    <strong>check_condition_pattern (pattern_found, condition)</strong>
+    <a name = "find_first_matching_url"></a>
+    <strong>find_first_matching_url (text, patterns, start_pos, found_url_smaller_pos)</strong>
     </dt>
     <dd>
-    Check if the pattern found matches the condition
+    Find the first url in the text that matches any of the patterns
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">pattern_found</span>
+        <li><span class="parameter">text</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-         : The url to check
+          : Text to search for patterns
         </li>
-        <li><span class="parameter">condition</span>
-            <span class="types"><span class="type">function</span> or <span class="type">boolean</span></span>
-         : The condition to check (function(pattern_found))
+        <li><span class="parameter">patterns</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         : Patterns to search for urls in the text
+        </li>
+        <li><span class="parameter">start_pos</span>
+            <span class="types"><span class="type">number</span></span>
+         : Start position to search from (optional) (default: 0)
+        </li>
+        <li><span class="parameter">found_url_smaller_pos</span>
+            <span class="types"><span class="type">number</span></span>
+         : The position of the found url must be smaller than this number (optional) (default: string.len(text))
         </li>
     </ul>
 
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        : True if the pattern found matches the condition, otherwise false
-    </ol>
 
 
     <h3>See also:</h3>
     <ul>
          <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
     </ul>
-
-
-</dd>
-    <dt>
-    <a name = "check_file_patterns"></a>
-    <strong>check_file_patterns (file_patterns, is_excluded)</strong>
-    </dt>
-    <dd>
-    Check if the file path matches any of the patterns
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">file_patterns</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : Patterns to match the file path
-        </li>
-        <li><span class="parameter">is_excluded</span>
-            <span class="types"><span class="type">boolean</span></span>
-         : If the file path is excluded (optional) (default: false)
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        : True if the file path matches any of the patterns, otherwise false
-    </ol>
-
-
 
 
 </dd>
@@ -235,45 +206,74 @@
     <ul>
          <li><a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a></li>
          <li><a href="../modules/url-open.modules.options.html#">url-open.modules.options</a></li>
-         <li><a href="../modules/url-open.modules.handlers.html#find_first_url_matching_patterns">url-open.modules.handlers.find_first_url_matching_patterns</a></li>
+         <li><a href="../modules/url-open.modules.handlers.html#find_first_matching_url">url-open.modules.handlers.find_first_matching_url</a></li>
     </ul>
 
 
 </dd>
     <dt>
-    <a name = "find_first_url_matching_patterns"></a>
-    <strong>find_first_url_matching_patterns (text, patterns, start_pos, found_url_smaller_pos)</strong>
+    <a name = "matches_condition_pattern"></a>
+    <strong>matches_condition_pattern (pattern_found, condition)</strong>
     </dt>
     <dd>
-    Find the first url in the text that matches any of the patterns
+    Check if the pattern found matches the condition
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">text</span>
+        <li><span class="parameter">pattern_found</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
-          : Text to search for patterns
+         : The url to check
         </li>
-        <li><span class="parameter">patterns</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         : Patterns to search for urls in the text
-        </li>
-        <li><span class="parameter">start_pos</span>
-            <span class="types"><span class="type">number</span></span>
-         : Start position to search from (optional) (default: 0)
-        </li>
-        <li><span class="parameter">found_url_smaller_pos</span>
-            <span class="types"><span class="type">number</span></span>
-         : The position of the found url must be smaller than this number (optional) (default: string.len(text))
+        <li><span class="parameter">condition</span>
+            <span class="types"><span class="type">function</span> or <span class="type">boolean</span></span>
+         : The condition to check (function(pattern_found))
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        : True if the pattern found matches the condition, otherwise false
+    </ol>
 
 
     <h3>See also:</h3>
     <ul>
          <a href="../modules/url-open.modules.patterns.html#">url-open.modules.patterns</a>
     </ul>
+
+
+</dd>
+    <dt>
+    <a name = "matches_file_patterns"></a>
+    <strong>matches_file_patterns (file_patterns, is_excluded)</strong>
+    </dt>
+    <dd>
+    Check if the file path matches any of the patterns
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">file_patterns</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         : Patterns to match the file path
+        </li>
+        <li><span class="parameter">is_excluded</span>
+            <span class="types"><span class="type">boolean</span></span>
+         : If the file path is excluded (optional) (default: false)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        : True if the file path matches any of the patterns, otherwise false
+    </ol>
+
+
 
 
 </dd>
@@ -370,7 +370,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-09-23 16:15:02 </i>
+<i style="float:right;">Last updated 2023-09-24 10:02:27 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 
