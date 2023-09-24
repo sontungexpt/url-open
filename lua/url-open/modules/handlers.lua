@@ -26,7 +26,7 @@ end
 --- @tparam table file_patterns : Patterns to match the file path
 --- @tparam boolean is_excluded : If the file path is excluded (optional) (default: false)
 --- @treturn boolean : True if the file path matches any of the patterns, otherwise false
-M.check_file_patterns = function(file_patterns, is_excluded)
+M.matches_file_patterns = function(file_patterns, is_excluded)
 	if type(file_patterns) == "string" then file_patterns = { file_patterns } end
 	if file_patterns == nil or #file_patterns == 0 then return not is_excluded end
 
@@ -42,7 +42,7 @@ end
 --- @tparam function|boolean condition : The condition to check (function(pattern_found))
 --- @treturn boolean : True if the pattern found matches the condition, otherwise false
 --- @see url-open.modules.patterns
-M.check_condition_pattern = function(pattern_found, condition)
+M.matches_condition_pattern = function(pattern_found, condition)
 	-- type(nil) == nil
 	if type(condition) == "function" then condition = condition(pattern_found) end
 	return type(condition) ~= "boolean" and true or condition
@@ -54,21 +54,21 @@ end
 --- @tparam number start_pos : Start position to search from (optional) (default: 0)
 --- @tparam number found_url_smaller_pos : The position of the found url must be smaller than this number (optional) (default: string.len(text))
 --- @see url-open.modules.patterns
-M.find_first_url_matching_patterns = function(text, patterns, start_pos, found_url_smaller_pos)
+M.find_first_matching_url = function(text, patterns, start_pos, found_url_smaller_pos)
 	start_pos = start_pos or 1
 	found_url_smaller_pos = found_url_smaller_pos or #text
 	local start_found, end_found, url_found = nil, nil, nil
 
 	for _, cond in ipairs(patterns) do
 		if
-			not M.check_file_patterns(cond.excluded_file_patterns, true)
-			and M.check_file_patterns(cond.file_patterns)
+			not M.matches_file_patterns(cond.excluded_file_patterns, true)
+			and M.matches_file_patterns(cond.file_patterns)
 		then
 			local start_pos_result, end_pos_result, url = text:find(cond.pattern, start_pos)
 			if
 				url
 				and found_url_smaller_pos > start_pos_result
-				and M.check_condition_pattern(url, cond.extra_condition)
+				and M.matches_condition_pattern(url, cond.extra_condition)
 			then
 				found_url_smaller_pos = start_pos_result
 				url_found = (cond.prefix or "") .. url .. (cond.suffix or "")
@@ -87,14 +87,14 @@ end
 --- @treturn number start_pos, number end_pos, string url: Start position, end position, and url of the first url found (all nil if not found)
 --- @see url-open.modules.patterns
 --- @see url-open.modules.options
---- @see url-open.modules.handlers.find_first_url_matching_patterns
+--- @see url-open.modules.handlers.find_first_matching_url
 M.find_first_url_in_line = function(user_opts, text, start_pos)
 	-- check default patterns first
 	local start_found, end_found, url_found =
-		M.find_first_url_matching_patterns(text, patterns_module.PATTERNS, start_pos)
+		M.find_first_matching_url(text, patterns_module.PATTERNS, start_pos)
 
 	local extra_start_found, extra_end_found, extra_url_found =
-		M.find_first_url_matching_patterns(text, user_opts.extra_patterns, start_pos, start_found)
+		M.find_first_matching_url(text, user_opts.extra_patterns, start_pos, start_found)
 
 	if extra_start_found then
 		start_found, end_found, url_found = extra_start_found, extra_end_found, extra_url_found
