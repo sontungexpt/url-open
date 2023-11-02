@@ -146,7 +146,7 @@ M.system_open_url = function(user_opts, url)
 		local open_app = user_opts.open_app
 		if open_app == "default" or open_app == "" then
 			if os_uname == "Linux" then
-				M.open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open" }, url)
+				M.open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open", "wslview" }, url)
 			elseif vim.loop.os_uname().sysname == "Darwin" then
 				M.open_url_with_app({ "open" }, url)
 			elseif vim.loop.os_uname().sysname == "Windows" then
