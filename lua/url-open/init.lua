@@ -11,7 +11,7 @@ local augroup = api.nvim_create_augroup
 local Plugin = {}
 
 local info = function(msg, opts)
-	schedule(function() notify(msg, levels.INFO, opts or { title = "Information" }) end)
+	schedule(function() notify(msg, levels.INFO, opts or { title = "URL OPEN INFO" }) end)
 end
 
 local warn = function(msg, opts)
@@ -19,7 +19,7 @@ local warn = function(msg, opts)
 end
 
 local error = function(msg, opts)
-	schedule(function() notify(msg, levels.ERROR, opts or { title = "Error" }) end)
+	schedule(function() notify(msg, levels.ERROR, opts or { title = "URL OPEN ERROR" }) end)
 end
 
 local DEFAULT_OPTIONS = {
@@ -62,7 +62,7 @@ local PATTERNS = {
 		file_patterns = { "package%.json" },
 		excluded_file_patterns = nil,
 		extra_condition = function(pattern_found)
-			return not vim.tbl_contains({ "version", "proxy" }, pattern_found)
+			return not vim.tbl_contains({ "version", "proxy", "name" }, pattern_found)
 		end,
 	},
 	{
@@ -177,7 +177,7 @@ local find_first_url_in_line = function(user_opts, text, start_pos)
 	if user_opts.deep_pattern then
 		local results = fn.matchstrpos(text, DEEP_PATTERN, start_pos)
 		-- result[1] is url, result[2] is start_pos, result[3] is end_pos
-		if results[1] ~= "" and (start_found or #text) > results[2] + 1 then
+		if results[1] ~= "" and (start_found or #text) >= results[2] + 1 then
 			start_found, end_found, url_found = results[2] + 1, results[3], results[1]
 		end
 	end
@@ -188,8 +188,7 @@ end
 local open_url_with_app = function(apps, url)
 	for _, app in ipairs(apps) do
 		if fn.executable(app) == 1 then
-			local shell_safe_url = fn.shellescape(url)
-			local command = "silent! !" .. app .. " " .. shell_safe_url
+			local command = "silent! !" .. app .. " " .. fn.shellescape(url)
 			call_cmd(command, {
 				success = "Opening " .. url .. " successfully.",
 				error = "Opening " .. url .. " failed.",
@@ -197,12 +196,13 @@ local open_url_with_app = function(apps, url)
 			return
 		end
 	end
-	local error_message = "Cannot find any of the following applications to open the URL: "
-		.. table.concat(apps, ", ")
-		.. "on "
-		.. os_uname
-		.. ". Please install one of these applications or add your preferred app to the URL options."
-	error(error_message)
+	error(
+		string.format(
+			"Cannot find any of the following applications to open the URL: %s on %s. Please install one of these applications or add your preferred app to the URL options.",
+			table.concat(apps, ", "),
+			os_uname
+		)
+	)
 end
 
 local system_open_url = function(user_opts, url)
@@ -210,7 +210,7 @@ local system_open_url = function(user_opts, url)
 		local open_app = user_opts.open_app
 		if open_app == "default" or open_app == "" then
 			if os_uname == "Linux" then
-				open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open" }, url)
+				open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open", "wslview" }, url)
 			elseif vim.loop.os_uname().sysname == "Darwin" then
 				open_url_with_app({ "open" }, url)
 			elseif vim.loop.os_uname().sysname == "Windows" then
@@ -226,28 +226,31 @@ local system_open_url = function(user_opts, url)
 	end
 end
 
+local foreach_url_in_line = function(user_opts, line, callback)
+	local start_found, end_found, url = find_first_url_in_line(user_opts, line)
+
+	while url do
+		if callback(url, start_found, end_found) then return end
+		start_found, end_found, url = find_first_url_in_line(user_opts, line, end_found + 1)
+	end
+end
+
 local open_url = function(user_opts)
-	local cursor_pos = api.nvim_win_get_cursor(0)
-	local cursor_col = cursor_pos[2]
+	local cursor_col = api.nvim_win_get_cursor(0)[2]
 	local line = api.nvim_get_current_line()
 	local url_to_open = nil
 
-	-- get the first url in the line
-	local start_pos, end_pos, url = find_first_url_in_line(user_opts, line)
-
-	while url do
+	foreach_url_in_line(user_opts, line, function(url, start_found, end_found)
 		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
+			if cursor_col >= start_found - 1 and cursor_col < end_found then
 				url_to_open = url
-				break
+				return true -- no need to continue the loop
 			end
 		else
 			url_to_open = url
+			return cursor_col < end_found -- if cursor is on the url, no need to continue the loop
 		end
-		if cursor_col < end_pos then break end
-		-- find the next url
-		start_pos, end_pos, url = find_first_url_in_line(user_opts, line, end_pos + 1)
-	end
+	end)
 
 	system_open_url(user_opts, url_to_open)
 end
@@ -297,32 +300,26 @@ local function highlight_cursor_url(user_opts)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
 
-	local start_pos, end_pos, url = find_first_url_in_line(user_opts, line)
-
-	while url do
-		-- clear the other highlight url to make sure only one url is highlighted
+	foreach_url_in_line(user_opts, line, function(_, start_found, end_found)
 		delete_url_effect("URLOpenHighlightCursor")
 		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
+			if cursor_col >= start_found - 1 and cursor_col < end_found then
 				fn.matchaddpos(
 					"URLOpenHighlightCursor",
-					{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
+					{ { cursor_row, start_found, end_found - start_found + 1 } },
 					20
 				)
-				break
+				return true -- no need to continue the loop
 			end
 		else
 			fn.matchaddpos(
 				"URLOpenHighlightCursor",
-				{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
+				{ { cursor_row, start_found, end_found - start_found + 1 } },
 				20
 			)
+			return cursor_col < end_found -- if cursor is on the url, no need to continue the loop
 		end
-
-		if cursor_col < end_pos then break end
-
-		start_pos, end_pos, url = find_first_url_in_line(user_opts, line, end_pos + 1)
-	end
+	end)
 end
 
 local init_autocmd = function(user_opts)
