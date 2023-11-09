@@ -1,3 +1,4 @@
+local vim = vim
 local api = vim.api
 local fn = vim.fn
 local levels = vim.log.levels
