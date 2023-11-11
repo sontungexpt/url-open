@@ -349,7 +349,8 @@ local init_autocmd = function(user_opts)
 end
 
 Plugin.setup = function(user_opts)
-	local options = vim.tbl_deep_extend("force", DEFAULT_OPTIONS, user_opts or {})
+	local options = type(user_opts) ~= "table" and DEFAULT_OPTIONS
+		or vim.tbl_deep_extend("force", DEFAULT_OPTIONS, user_opts)
 	init_command(options)
 	init_autocmd(options)
 end
