@@ -49,7 +49,7 @@ default browser of your system.
 },
 ```
 
-- NOTE: If you want to use minimal source with no commnets, no validate configs,
+- NOTE: If you want to use minimal source with no comments, no validate configs,
   you can use branch `mini` instead of `main` branch. Make sure you know that your config is valid
 
 ```lua
@@ -74,7 +74,7 @@ You can easily add more patterns to open url under cursor by adding more pattern
 
 ```lua
 -- default values
-require("url_open").setup({
+require("url-open").setup({
     -- if true, only open url when cursor in the middle of url
     -- if false, open next url found from cursor position it means you can open
     -- url even when the cursor is in front of url or in the middle of url
