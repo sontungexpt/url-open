@@ -70,7 +70,7 @@ https://github.com/sontungexpt/url-open/assets/92097639/c51b3e1c-8eae-48f0-a542-
 },
 ```
 
-- NOTE: If you want to use minimal source with no commnets, no validate configs, no documents,
+- NOTE: If you want to use minimal source with no comments, no validate configs, no documents,
   you can use branch `mini` instead of `main` branch. Make sure you know that your config is valid
 
 ```lua
@@ -96,7 +96,7 @@ You can easily add more patterns to open url under cursor by adding more pattern
 
 ```lua
 -- default values
-require("url_open").setup({
+require("url-open").setup({
     -- default will open url with default browser of your system or you can choose your browser like this
     -- open_app = "micorsoft-edge-stable",
     -- google-chrome, firefox, micorsoft-edge-stable, opera, brave, vivaldi
