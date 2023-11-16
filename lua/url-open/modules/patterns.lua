@@ -44,7 +44,7 @@ M.PATTERNS = {
 		file_patterns = { "package%.json" },
 		excluded_file_patterns = nil,
 		extra_condition = function(pattern_found)
-			return not vim.tbl_contains({ "version", "proxy" }, pattern_found)
+			return not vim.tbl_contains({ "name", "version", "proxy" }, pattern_found)
 		end,
 	},
 	{
