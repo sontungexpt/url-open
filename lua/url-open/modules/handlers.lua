@@ -3,10 +3,11 @@
 --
 local api = vim.api
 local fn = vim.fn
+local uv = vim.uv or vim.loop
 
 local patterns_module = require("url-open.modules.patterns")
 local logger = require("url-open.modules.logger")
-local os_uname = vim.loop.os_uname().sysname
+local os_uname = uv.os_uname().sysname
 
 local M = {}
 
@@ -129,12 +130,13 @@ M.open_url_with_app = function(apps, url)
 			return
 		end
 	end
-	local error_message = "Cannot find any of the following applications to open the URL: "
-		.. table.concat(apps, ", ")
-		.. "on "
-		.. os_uname
-		.. ". Please install one of these applications or add your preferred app to the URL options."
-	logger.error(error_message)
+	logger.error(
+		string.format(
+			"Cannot find any of the following applications to open the URL: %s on %s. Please install one of these applications or add your preferred app to the URL options.",
+			table.concat(apps, ", "),
+			os_uname
+		)
+	)
 end
 
 --- Open the url relying on the operating system
@@ -162,6 +164,20 @@ M.system_open_url = function(user_opts, url)
 	end
 end
 
+--- Iterate through all urls in the line
+--- @tparam table user_opts : User options
+--- @tparam string line : The line to iterate through
+--- @tparam function callback : The callback function to call for each url
+--- @see url-open.modules.handlers.find_first_url_in_line
+M.foreach_url_in_line = function(user_opts, line, callback)
+	local start_found, end_found, url = M.find_first_url_in_line(user_opts, line)
+
+	while url do
+		if callback(url, start_found, end_found) then return end
+		start_found, end_found, url = M.find_first_url_in_line(user_opts, line, end_found + 1)
+	end
+end
+
 --- Open the url under the cursor
 --- If there is only one url in the line, then open it anywhere in the line.
 --- @tparam table user_opts : User options
@@ -175,23 +191,17 @@ M.open_url = function(user_opts)
 	local url_to_open = nil
 
 	-- get the first url in the line
-	local start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line)
-
-	while url do
-		-- if the url under cursor, then break
+	M.foreach_url_in_line(user_opts, line, function(url, start_found, end_found)
 		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
+			if cursor_col >= start_found - 1 and cursor_col < end_found then
 				url_to_open = url
-				break
+				return true -- no need to continue the loop
 			end
 		else
 			url_to_open = url
+			return cursor_col < end_found -- if cursor is on the url, no need to continue the loop
 		end
-
-		if cursor_col < end_pos then break end
-		-- find the next url
-		start_pos, end_pos, url = M.find_first_url_in_line(user_opts, line, end_pos + 1)
-	end
+	end)
 
 	M.system_open_url(user_opts, url_to_open)
 end

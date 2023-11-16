@@ -45,33 +45,26 @@ M.highlight_cursor_url = function(user_opts)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
 
-	local start_pos, end_pos, url = handlers.find_first_url_in_line(user_opts, line)
-
-	while url do
-		-- clear the other highlight url to make sure only one url is highlighted
+	handlers.foreach_url_in_line(user_opts, line, function(_, start_found, end_found)
 		M.delete_url_effect("URLOpenHighlightCursor")
 		if user_opts.open_only_when_cursor_on_url then
-			if cursor_col >= start_pos - 1 and cursor_col < end_pos then
+			if cursor_col >= start_found - 1 and cursor_col < end_found then
 				fn.matchaddpos(
 					"URLOpenHighlightCursor",
-					{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
+					{ { cursor_row, start_found, end_found - start_found + 1 } },
 					20
 				)
-				break
+				return true -- no need to continue the loop
 			end
 		else
 			fn.matchaddpos(
 				"URLOpenHighlightCursor",
-				{ { cursor_row, start_pos, end_pos - start_pos + 1 } },
+				{ { cursor_row, start_found, end_found - start_found + 1 } },
 				20
 			)
+			return cursor_col < end_found -- if cursor is on the url, no need to continue the loop
 		end
-
-		if cursor_col < end_pos then break end
-
-		-- find the next url
-		start_pos, end_pos, url = handlers.find_first_url_in_line(user_opts, line, end_pos + 1)
-	end
+	end)
 end
 
 return M
