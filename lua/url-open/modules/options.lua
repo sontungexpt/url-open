@@ -72,38 +72,38 @@ M.validate_opts = function(opts)
 				deep_pattern = { opts.deep_pattern, "boolean", true },
 				extra_patterns = { opts.extra_patterns, "table", true },
 			}
-		end
 
-		if opts.extra_patterns then
-			for _, cond in ipairs(opts.extra_patterns) do
-				validate {
-					pattern = { cond.pattern, "string" },
-				}
-			end
-		end
-
-		if opts.highlight_url then
-			validate {
-				all_urls = { opts.highlight_url.all_urls, "table", true },
-				cursor_move = { opts.highlight_url.cursor_move, "table", true },
-			}
-
-			if opts.highlight_url.all_urls then
-				validate {
-					enabled = { opts.highlight_url.all_urls.enabled, "boolean", true },
-					fg = { opts.highlight_url.all_urls.fg, "string", true },
-					bg = { opts.highlight_url.all_urls.bg, "string", true },
-					underline = { opts.highlight_url.all_urls.underline, "boolean", true },
-				}
+			if opts.extra_patterns then
+				for _, cond in ipairs(opts.extra_patterns) do
+					validate {
+						pattern = { cond.pattern, "string" },
+					}
+				end
 			end
 
-			if opts.highlight_url.cursor_move then
+			if opts.highlight_url then
 				validate {
-					enabled = { opts.highlight_url.cursor_move.enabled, "boolean", true },
-					fg = { opts.highlight_url.cursor_move.fg, "string", true },
-					bg = { opts.highlight_url.cursor_move.bg, "string", true },
-					underline = { opts.highlight_url.cursor_move.underline, "boolean", true },
+					all_urls = { opts.highlight_url.all_urls, "table", true },
+					cursor_move = { opts.highlight_url.cursor_move, "table", true },
 				}
+
+				if opts.highlight_url.all_urls then
+					validate {
+						enabled = { opts.highlight_url.all_urls.enabled, "boolean", true },
+						fg = { opts.highlight_url.all_urls.fg, "string", true },
+						bg = { opts.highlight_url.all_urls.bg, "string", true },
+						underline = { opts.highlight_url.all_urls.underline, "boolean", true },
+					}
+				end
+
+				if opts.highlight_url.cursor_move then
+					validate {
+						enabled = { opts.highlight_url.cursor_move.enabled, "boolean", true },
+						fg = { opts.highlight_url.cursor_move.fg, "string", true },
+						bg = { opts.highlight_url.cursor_move.bg, "string", true },
+						underline = { opts.highlight_url.cursor_move.underline, "boolean", true },
+					}
+				end
 			end
 		end
 	end)
