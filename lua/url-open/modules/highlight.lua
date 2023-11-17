@@ -45,6 +45,9 @@ M.highlight_cursor_url = function(user_opts)
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
 
+	-- Fixes vim:E976 error when cursor is on a blob
+	if fn.type(line) == vim.v.t_blob then return end
+
 	handlers.foreach_url_in_line(user_opts, line, function(_, start_found, end_found)
 		M.delete_url_effect("URLOpenHighlightCursor")
 		if user_opts.open_only_when_cursor_on_url then
