@@ -114,15 +114,6 @@ local PATTERNS = {
 	},
 }
 
-local call_cmd = function(command, msg)
-	local success, error_message = pcall(api.nvim_command, command)
-	if success then
-		info(msg and msg.success or "Success")
-	else
-		error((msg and msg.error or "Error") .. ": " .. error_message)
-	end
-end
-
 local matches_file_patterns = function(file_patterns, is_excluded)
 	if type(file_patterns) == "string" then file_patterns = { file_patterns } end
 	if file_patterns == nil or #file_patterns == 0 then return not is_excluded end
@@ -190,10 +181,16 @@ end
 local open_url_with_app = function(apps, url)
 	for _, app in ipairs(apps) do
 		if fn.executable(app) == 1 then
-			local command = "silent! !" .. app .. " " .. fn.shellescape(url)
-			call_cmd(command, {
-				success = "Opening " .. url .. " successfully.",
-				error = "Opening " .. url .. " failed.",
+			local command = app .. " " .. fn.shellescape(url)
+			fn.jobstart(command, {
+				detach = true,
+				on_exit = function(_, code, _)
+					if code ~= 0 then
+						error("Opening " .. url .. " failed.")
+					else
+						info("Opening " .. url .. " successfully.")
+					end
+				end,
 			})
 			return
 		end
@@ -301,6 +298,9 @@ local function highlight_cursor_url(user_opts)
 	local cursor_row = cursor_pos[1]
 	local cursor_col = cursor_pos[2]
 	local line = api.nvim_get_current_line()
+
+	-- Fixes vim:E976 error when cursor is on a blob
+	if fn.type(line) == vim.v.t_blob then return end
 
 	foreach_url_in_line(user_opts, line, function(_, start_found, end_found)
 		delete_url_effect("URLOpenHighlightCursor")
