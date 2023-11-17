@@ -4,7 +4,6 @@ local M = {}
 local new_cmd = vim.api.nvim_create_user_command
 
 local handlers = require("url-open.modules.handlers")
-local logger = require("url-open.modules.logger")
 local highlight = require("url-open.modules.highlight")
 
 --- Setup the OpenUrlUnderCursor command and URLOpenHighlightAlls command.
@@ -15,7 +14,9 @@ local highlight = require("url-open.modules.highlight")
 --- @usage require("url-open.modules.commands").setup(opts)
 M.setup = function(user_opts)
 	new_cmd("OpenUrlUnderCursor", function()
-		logger.warn("OpenUrlUnderCursor is deprecated, please use URLOpenUnderCursor instead.")
+		require("url-open.modules.logger").warn(
+			"OpenUrlUnderCursor is deprecated, please use URLOpenUnderCursor instead."
+		)
 		handlers.open_url(user_opts)
 	end, { nargs = 0 })
 

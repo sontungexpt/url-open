@@ -4,24 +4,11 @@
 local api = vim.api
 local fn = vim.fn
 local uv = vim.uv or vim.loop
-
-local patterns_module = require("url-open.modules.patterns")
-local logger = require("url-open.modules.logger")
 local os_uname = uv.os_uname().sysname
 
-local M = {}
+local patterns_module = require("url-open.modules.patterns")
 
---- Call a vim command
---- @tparam string command : The command to execute
---- @tparam table msg : The message to print on success or error
-M.call_cmd = function(command, msg)
-	local success, error_message = pcall(api.nvim_command, command)
-	if success then
-		logger.info(msg and msg.success or "Success")
-	else
-		logger.error((msg and msg.error or "Error") .. ": " .. error_message)
-	end
-end
+local M = {}
 
 --- Check if the file path matches any of the patterns
 --- @tparam table file_patterns : Patterns to match the file path
@@ -117,20 +104,24 @@ end
 --- Open the url with the specified app
 --- @tparam table apps : The table of apps to open the url
 --- @tparam string url : The url to open
---- @see url-open.modules.handlers.call_cmd
 M.open_url_with_app = function(apps, url)
 	for _, app in ipairs(apps) do
 		if fn.executable(app) == 1 then
-			local shell_safe_url = fn.shellescape(url)
-			local command = "silent! !" .. app .. " " .. shell_safe_url
-			M.call_cmd(command, {
-				success = "Opening " .. url .. " successfully.",
-				error = "Opening " .. url .. " failed.",
+			local command = app .. " " .. fn.shellescape(url)
+			fn.jobstart(command, {
+				detach = true,
+				on_exit = function(_, code, _)
+					if code ~= 0 then
+						require("url-open.modules.logger").error("Opening " .. url .. " failed.")
+					else
+						require("url-open.modules.logger").info("Opening " .. url .. " successfully.")
+					end
+				end,
 			})
 			return
 		end
 	end
-	logger.error(
+	require("url-open.modules.logger").error(
 		string.format(
 			"Cannot find any of the following applications to open the URL: %s on %s. Please install one of these applications or add your preferred app to the URL options.",
 			table.concat(apps, ", "),
@@ -154,13 +145,13 @@ M.system_open_url = function(user_opts, url)
 			elseif vim.loop.os_uname().sysname == "Windows" then
 				M.open_url_with_app({ "start" }, url)
 			else
-				logger.error("Unknown operating system")
+				require("url-open.modules.logger").error("Unknown operating system")
 			end
 		else
 			M.open_url_with_app({ open_app }, url)
 		end
 	else
-		logger.error("No url found")
+		require("url-open.modules.logger").error("No url found")
 	end
 end
 
