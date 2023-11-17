@@ -24,7 +24,7 @@ open an issue or create a pull request to fix it
   If one line has multiple URLs, the first URLs in the right side of cursor will be opened.
 - 🎉 Open the URLs under the cursor, including the Markdown link (e.g. `https://github.com/sontungexpt/url-open`).
 - ✈️ Open the GitHub page for the Neovim plugin mentioned under the cursor
-  (e.g. `Plug 'nvim-lua/plenary.nvim'`, "sontungexpt/url-open").
+  (e.g. `Plug 'nvim-lua/plenary.nvim'`, `"sontungexpt/url-open"`).
 - 🍨 Easily open the npm package specified in the package.json file. (e.g. `"lodash": "^4.17.21",`).
 - 🍻 Open the Homebrew formula or cask specified in the Brewfile.
 - 🍕 Open the cargo package specified in the Cargo.toml file.
