@@ -48,7 +48,7 @@ M.PATTERNS = {
 		end,
 	},
 	{
-		pattern = "[\"']([^%s~/]*/[^%s~/]*)[\"']",
+		pattern = "[\"']([^%s~/]+/[^%s~/]+)[\"']",
 		prefix = "https://github.com/",
 		suffix = "",
 		file_patterns = nil,
