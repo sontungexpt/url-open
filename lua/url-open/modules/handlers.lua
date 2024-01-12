@@ -112,9 +112,9 @@ M.open_url_with_app = function(apps, url)
 				detach = true,
 				on_exit = function(_, code, _)
 					if code ~= 0 then
-						require("url-open.modules.logger").error("Opening " .. url .. " failed.")
+						require("url-open.modules.logger").error("Failed to open " .. url)
 					else
-						require("url-open.modules.logger").info("Opening " .. url .. " successfully.")
+						require("url-open.modules.logger").info("Opening " .. url)
 					end
 				end,
 			})
