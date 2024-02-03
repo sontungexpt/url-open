@@ -92,6 +92,33 @@ M.PATTERNS = {
 			}, pattern_found)
 		end,
 	},
+	{
+		pattern = "gem ['\"]([^%s]*)['\"]",
+		prefix = "https://rubygems.org/gems/",
+		suffix = "",
+		file_patterns = { "Gemfile", "gems.rb" },
+		excluded_file_patterns = nil,
+	},
+	-- Dockerfile images: unprefix, unnamespaced (the library images, like `ruby:3.2`)
+	-- results in: https://hub.docker.com/_/ruby/
+	{
+		pattern = "^FROM ([^:.]+):",
+		prefix = "https://hub.docker.com/_/",
+		suffix = "/",
+		file_patterns = { "Dockerfile%S*", "Containerfile%S*" },
+		excluded_file_patterns = nil,
+		extra_condition = function(matched_pattern) return not matched_pattern:match("/") end,
+	},
+	-- Dockerfile images: unprefixed but namespaced (like crystallang/crystal)
+	-- results in: https://hub.docker.com/r/crystallang/crystal
+	{
+		pattern = "FROM ([^:.]+):",
+		prefix = "https://hub.docker.com/r/",
+		suffix = "/",
+		file_patterns = { "Dockerfile%S*", "Containerfile%S*" },
+		excluded_file_patterns = nil,
+		extra_condition = function(matched_pattern) return matched_pattern:match("/") end,
+	},
 }
 
 return M
