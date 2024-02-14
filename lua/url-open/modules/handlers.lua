@@ -106,10 +106,10 @@ end
 --- @tparam string url : The url to open
 M.open_url_with_app = function(apps, url)
 	for _, app in ipairs(apps) do
-		if fn.executable(app) == 1 then
+		if fn.executable(app) == 1 or os_uname == "Windows_NT" then
 			local command = app .. " " .. fn.shellescape(url)
 			fn.jobstart(command, {
-				detach = true,
+				detach = os_uname ~= "Windows_NT",
 				on_exit = function(_, code, _)
 					if code ~= 0 then
 						require("url-open.modules.logger").error("Failed to open " .. url)
@@ -140,9 +140,9 @@ M.system_open_url = function(user_opts, url)
 		if open_app == "default" or open_app == "" then
 			if os_uname == "Linux" then
 				M.open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open", "wslview" }, url)
-			elseif vim.loop.os_uname().sysname == "Darwin" then
+			elseif os_uname == "Darwin" then
 				M.open_url_with_app({ "open" }, url)
-			elseif vim.loop.os_uname().sysname == "Windows" then
+			elseif os_uname == "Windows_NT" then
 				M.open_url_with_app({ "start" }, url)
 			else
 				require("url-open.modules.logger").error("Unknown operating system")
