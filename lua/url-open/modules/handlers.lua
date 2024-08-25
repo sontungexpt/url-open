@@ -106,20 +106,18 @@ end
 --- @tparam string url : The url to open
 M.open_url_with_app = function(apps, url)
 	for _, app in ipairs(apps) do
-		if fn.executable(app) == 1 then
-			local command = app .. " " .. fn.shellescape(url)
-			fn.jobstart(command, {
-				detach = true,
-				on_exit = function(_, code, _)
-					if code ~= 0 then
-						require("url-open.modules.logger").error("Failed to open " .. url)
-					else
-						require("url-open.modules.logger").info("Opening " .. url)
-					end
-				end,
-			})
-			return
-		end
+		local command = app .. " " .. fn.shellescape(url)
+		fn.jobstart(command, {
+			detach = true,
+			on_exit = function(_, code, _)
+				if code ~= 0 then
+					require("url-open.modules.logger").error("Failed to open " .. url)
+				else
+					require("url-open.modules.logger").info("Opening " .. url)
+				end
+			end,
+		})
+		return
 	end
 	require("url-open.modules.logger").error(
 		string.format(
@@ -130,6 +128,8 @@ M.open_url_with_app = function(apps, url)
 	)
 end
 
+local is_wsl = uv.os_uname().release:lower():find("microsoft") and true or false
+
 --- Open the url relying on the operating system
 --- @tparam table user_opts : User options
 --- @tparam string url : The url to open
@@ -138,12 +138,12 @@ M.system_open_url = function(user_opts, url)
 	if url then
 		local open_app = user_opts.open_app
 		if open_app == "default" or open_app == "" then
-			if os_uname == "Linux" then
+			if vim.loop.os_uname().sysname == "Windows" or is_wsl then
+				M.open_url_with_app({ "cmd.exe /C start" }, url)
+			elseif os_uname == "Linux" then
 				M.open_url_with_app({ "xdg-open", "gvfs-open", "gnome-open", "wslview" }, url)
 			elseif vim.loop.os_uname().sysname == "Darwin" then
 				M.open_url_with_app({ "open" }, url)
-			elseif vim.loop.os_uname().sysname == "Windows" then
-				M.open_url_with_app({ "start" }, url)
 			else
 				require("url-open.modules.logger").error("Unknown operating system")
 			end
