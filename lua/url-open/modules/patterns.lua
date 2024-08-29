@@ -99,22 +99,22 @@ M.PATTERNS = {
 		file_patterns = { "Gemfile", "gems.rb" },
 		excluded_file_patterns = nil,
 	},
-	-- Terraform AWS Resources like `resource "aws_iam_policy"`
-	-- results in: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/aws_iam_policy"
-    {
-        pattern = "resource [\"]aws_([^%s]*)[\"]",
-        prefix = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/",
-        file_patterns = { ".*.tf" },
-        excluded_file_patterns = nil,
-    },
-	-- Terraform AWS Data Sources like `data "aws_iam_policy"`
-	-- results in: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/aws_iam_policy"
-    {
-        pattern = "data [\"]aws_([^%s]*)[\"]",
-        prefix = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/",
-        file_patterns = { ".*.tf" },
-        excluded_file_patterns = nil,
-    },
+    	-- Terraform AWS Resources like `resource "aws_iam_policy"`
+    	-- results in: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/aws_iam_policy"
+        {
+            pattern = "resource [\"]aws_([^%s]*)[\"]",
+            prefix = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/",
+            file_patterns = { ".*.tf" },
+            excluded_file_patterns = nil,
+        },
+    	-- Terraform AWS Data Sources like `data "aws_iam_policy"`
+    	-- results in: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/aws_iam_policy"
+        {
+            pattern = "data [\"]aws_([^%s]*)[\"]",
+            prefix = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/",
+            file_patterns = { ".*.tf" },
+            excluded_file_patterns = nil,
+        },
 	-- Dockerfile images: unprefix, unnamespaced (the library images, like `ruby:3.2`)
 	-- results in: https://hub.docker.com/_/ruby/
 	{
