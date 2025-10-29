@@ -72,7 +72,7 @@ M.PATTERNS = {
 		extra_condition = nil,
 	},
 	{
-		pattern = "^%s*([%w_]+)%s*=",
+		pattern = "^%s*([%w-_]+)%s*=",
 		prefix = "https://crates.io/crates/",
 		suffix = "",
 		file_patterns = { "Cargo%.toml" },
